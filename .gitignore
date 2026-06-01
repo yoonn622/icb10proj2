@@ -1,0 +1,69 @@
+# ==========================================
+# 파이썬 데이터 분석 프로젝트용 .gitignore
+# ==========================================
+
+# --- 파이썬 컴파일 및 캐시 파일 ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- 가상환경 (Virtual Environments) ---
+# uv 혹은 기본 venv 가상환경 폴더 제외
+.venv/
+venv/
+ENV/
+env/
+
+# --- Jupyter Notebook 관련 ---
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+.ipynb_checkpoints/
+.ipython/
+profile_default/
+ipython_config.py
+
+# --- 데이터 디렉토리 및 대용량 데이터 파일 ---
+# 데이터 분석 프로젝트에서는 대용량 바이너리 파일이나 원본 데이터를 Git에 올리지 않는 것이 좋습니다.
+data/
+raw_data/
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.parquet
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.db
+*.sqlite3
+
+# --- 환경변수 및 API 키 등 보안 관련 파일 ---
+.env
+.env.shared
+.env.secret
+.secrets
+credentials.json
+*.pem
+*.key
+
+# --- IDE 및 에디터 설정 ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*~
+
+# --- OS 임시 파일 ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
