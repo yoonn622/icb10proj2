@@ -142,6 +142,72 @@ def fetch_search_data(client_id, client_secret, api_type, query, display=100):
     except Exception as e:
         raise e
 
+# 쇼핑인사이트에 사용되는 네이버 쇼핑 분야별 카테고리 ID (cid) 매핑 정보
+SHOPPING_CATEGORIES = {
+    "패션의류": "50000000",
+    "패션잡화": "50000001",
+    "화장품/미용": "50000002",
+    "디지털/가전": "50000003",
+    "가구/인테리어": "50000004",
+    "출산/육아": "50000005",
+    "식품": "50000006",
+    "스포츠/레저": "50000007",
+    "생활/건강": "50000008",
+    "여가/생활편의": "50000009",
+    "면세점": "50000010",
+    "도서": "50005542"
+}
+
+@st.cache_data(show_spinner=False)
+def fetch_shopping_insight_trend(client_id, client_secret, categories_list, start_date, end_date):
+    """
+    네이버 데이터랩 쇼핑인사이트 분야별 트렌드 API 호출
+    """
+    url = "https://openapi.naver.com/v1/datalab/shopping/categories"
+    headers = {
+        "X-Naver-Client-Id": client_id.strip(),
+        "X-Naver-Client-Secret": client_secret.strip(),
+        "Content-Type": "application/json"
+    }
+    
+    category_param = []
+    for cat in categories_list[:5]:
+        category_param.append({
+            "name": cat["name"],
+            "param": [cat["cid"]]
+        })
+        
+    body = {
+        "startDate": start_date.strftime("%Y-%m-%d"),
+        "endDate": end_date.strftime("%Y-%m-%d"),
+        "timeUnit": "date",
+        "category": category_param
+    }
+    
+    try:
+        response = requests.post(url, json=body, headers=headers)
+        if response.status_code == 200:
+            res_json = response.json()
+            results = res_json.get("results", [])
+            df_list = []
+            for group in results:
+                title = group.get("title")
+                data_points = group.get("data", [])
+                for dp in data_points:
+                    df_list.append({
+                        "period": pd.to_datetime(dp.get("period")),
+                        "ratio": dp.get("ratio"),
+                        "category_name": title
+                    })
+            if df_list:
+                return pd.DataFrame(df_list)
+            else:
+                raise Exception("결과 데이터가 비어 있습니다.")
+        else:
+            raise Exception(f"오류 발생 (HTTP {response.status_code}): {response.text}")
+    except Exception as e:
+        raise e
+
 def get_merged_search_data(client_id, client_secret, api_type, keywords_list, display=100):
     """
     여러 키워드에 대해 검색 데이터를 수집하고 하나로 병합
@@ -577,112 +643,174 @@ elif page == "🛍️ 쇼핑 검색 분석":
 # ------------------------------------------------------------------------------
 elif page == "📊 쇼핑 트렌드 분석":
     st.title("📊 네이버 쇼핑 트렌드 다차원 분석")
-    st.markdown("쇼핑 검색 데이터 내의 상품 타입(`productType`) 정보를 연계하여 가격비교, 중고 상품 및 가격 트렌드를 심층 분석합니다.")
     
-    if not keywords_list:
-        st.warning("분석할 검색 키워드를 입력해 주세요.")
-    else:
-        with st.spinner("쇼핑 트렌드 데이터를 수집하는 중..."):
-            df_shop_trend, errors = get_merged_search_data(
-                st.session_state["client_id"],
-                st.session_state["client_secret"],
-                "shop",
-                keywords_list,
-                display=100
-            )
-            
-        if errors:
-            for err in errors:
-                st.error(err)
-                
-        if df_shop_trend.empty:
-            st.info("수집된 쇼핑 데이터가 없습니다.")
+    # 탭 구성: 1. 카테고리 클릭 트렌드 (쇼핑인사이트), 2. 상품군 유형 및 가격 분석
+    tab_insight, tab_type = st.tabs(["🛍️ 카테고리 클릭 트렌드 (쇼핑인사이트)", "📦 상품군 유형 및 가격 분석"])
+    
+    with tab_insight:
+        st.subheader("🛍️ 네이버 쇼핑 카테고리별 클릭 추이 분석")
+        st.markdown("네이버 데이터랩 쇼핑인사이트 API를 통해 주요 쇼핑 분야별 상대적 클릭 관심도 추이를 시각화합니다.")
+        
+        # 멀티 셀렉트로 카테고리 선택 받기 (최대 5개까지 API 지원)
+        default_cats = ["패션의류", "패션잡화", "디지털/가전"]
+        selected_cats = st.multiselect(
+            "조회할 쇼핑 카테고리 (최대 5개 선택)",
+            options=list(SHOPPING_CATEGORIES.keys()),
+            default=default_cats,
+            help="네이버 데이터랩 API 스펙상 한 번에 최대 5개 분야까지 분석 가능합니다."
+        )
+        
+        if not selected_cats:
+            st.warning("분석할 쇼핑 카테고리를 하나 이상 선택해 주세요.")
         else:
-            # lprice 타입 정제
-            df_shop_trend["lprice"] = pd.to_numeric(df_shop_trend["lprice"], errors='coerce').fillna(0)
-            # productType 타입 정제
-            df_shop_trend["productType"] = pd.to_numeric(df_shop_trend["productType"], errors='coerce').fillna(2)
+            # 카테고리 리스트 가공
+            cats_list_to_fetch = [{"name": name, "cid": SHOPPING_CATEGORIES[name]} for name in selected_cats[:5]]
             
-            # 상품군 매핑 정의 (가이드 문서 기준)
-            type_mapping = {
-                1: "일반 - 가격비교 매칭",
-                2: "일반 - 가격비교 비매칭",
-                3: "일반 - 가격비교 매칭 일반",
-                4: "중고 - 가격비교 매칭",
-                5: "중고 - 가격비교 비매칭",
-                6: "중고 - 가격비교 매칭 일반",
-                7: "단종 - 가격비교 매칭",
-                8: "단종 - 가격비교 비매칭",
-                9: "단종 - 가격비교 매칭 일반",
-                10: "판매예정 - 가격비교 매칭",
-                11: "판매예정 - 가격비교 비매칭",
-                12: "판매예정 - 가격비교 매칭 일반"
-            }
-            
-            df_shop_trend["상품유형"] = df_shop_trend["productType"].map(type_mapping).fillna("기타/비매칭")
-            
-            # 상품 대분류군 묶기 (일반, 중고, 단종, 판매예정)
-            def get_group(ptype):
-                if ptype in [1, 2, 3]: return "일반상품"
-                elif ptype in [4, 5, 6]: return "중고상품"
-                elif ptype in [7, 8, 9]: return "단종상품"
-                elif ptype in [10, 11, 12]: return "판매예정상품"
-                return "기타"
-            df_shop_trend["상품대그룹"] = df_shop_trend["productType"].apply(get_group)
-            
-            # 가격비교 여부 묶기
-            def get_comparison(ptype):
-                if ptype in [1, 4, 7, 10]: return "가격비교 상품"
-                elif ptype in [2, 5, 8, 11]: return "가격비교 비매칭"
-                return "가격비교 매칭일반"
-            df_shop_trend["가격비교여부"] = df_shop_trend["productType"].apply(get_comparison)
-            
-            # 1) 상품군 분포 분석 시각화
-            st.markdown("### 📦 수집 상품군 유형 분석")
-            col1, col2 = st.columns(2)
-            with col1:
-                group_counts = df_shop_trend["상품대그룹"].value_counts().reset_index()
-                fig_group = px.pie(
-                    group_counts,
-                    values="count",
-                    names="상품대그룹",
-                    title="상품 대그룹 분류 비율 (일반 vs 중고 vs 단종 등)"
+            with st.spinner("쇼핑인사이트 데이터를 수집하는 중..."):
+                try:
+                    df_insight = fetch_shopping_insight_trend(
+                        st.session_state["client_id"],
+                        st.session_state["client_secret"],
+                        cats_list_to_fetch,
+                        start_date,
+                        end_date
+                    )
+                    
+                    # 1) 시각화 - 시계열 클릭 트렌드 라인 차트
+                    fig_insight = px.line(
+                        df_insight, 
+                        x="period", 
+                        y="ratio", 
+                        color="category_name",
+                        title="분류 분야별 상대적 클릭 관심도 추이 (최고점=100)",
+                        labels={"period": "날짜", "ratio": "클릭 비율 (%)", "category_name": "카테고리"}
+                    )
+                    fig_insight.update_layout(hovermode="x unified")
+                    st.plotly_chart(fig_insight, use_container_width=True)
+                    
+                    # 2) 카테고리별 통계 검증 분석
+                    st.markdown("#### 📊 카테고리별 세부 관심도 통계 지표")
+                    insight_stats_list = []
+                    for cat_name in df_insight["category_name"].unique():
+                        cat_df = df_insight[df_insight["category_name"] == cat_name]
+                        stats = calculate_advanced_stats(cat_df, "ratio")
+                        if stats:
+                            stats["카테고리"] = cat_name
+                            insight_stats_list.append(stats)
+                    if insight_stats_list:
+                        df_insight_stats = pd.DataFrame(insight_stats_list).set_index("카테고리").T
+                        st.dataframe(df_insight_stats.style.format("{:,.2f}"), use_container_width=True)
+                        
+                except Exception as e:
+                    st.error(f"쇼핑인사이트 API 호출 실패: {str(e)}")
+                    
+    with tab_type:
+        st.subheader("📦 수집된 쇼핑 상품군 유형 및 가격 분석")
+        st.markdown("수집된 상품들의 타입(`productType`) 코드 정보와 가격 정보를 매핑하여 구조적인 특징을 분석합니다.")
+        
+        if not keywords_list:
+            st.warning("분석할 검색 키워드를 입력해 주세요.")
+        else:
+            with st.spinner("쇼핑 상품 데이터를 분석하는 중..."):
+                df_shop_trend, errors = get_merged_search_data(
+                    st.session_state["client_id"],
+                    st.session_state["client_secret"],
+                    "shop",
+                    keywords_list,
+                    display=100
                 )
-                st.plotly_chart(fig_group, use_container_width=True)
-            with col2:
-                comp_counts = df_shop_trend["가격비교여부"].value_counts().reset_index()
-                fig_comp = px.pie(
-                    comp_counts,
-                    values="count",
-                    names="가격비교여부",
-                    title="가격비교 서비스 연동 상태 비율"
-                )
-                st.plotly_chart(fig_comp, use_container_width=True)
                 
-            # 2) 상품유형별 가격 트렌드 비교 (Box Plot)
-            st.markdown("---")
-            st.markdown("### 💸 상품유형별 가격 트렌드 분석")
-            
-            fig_trend_box = px.box(
-                df_shop_trend[df_shop_trend["lprice"] > 0],
-                x="상품유형",
-                y="lprice",
-                color="search_keyword",
-                title="상세 상품유형별 가격 분포 박스 플롯",
-                labels={"lprice": "가격 (원)", "상품유형": "상품 상세 유형"}
-            )
-            st.plotly_chart(fig_trend_box, use_container_width=True)
-            
-            # 유형별 데이터 표 요약
-            st.markdown("#### 상품 유형별 통계 요약표")
-            summary_tbl = df_shop_trend[df_shop_trend["lprice"] > 0].groupby(["search_keyword", "상품유형"])["lprice"].agg(
-                ["count", "mean", "median", "std", "min", "max"]
-            ).rename(columns={
-                "count": "상품수", "mean": "평균가", "median": "중앙가", "std": "표준편차", "min": "최저가", "max": "최고가"
-            }).reset_index()
-            st.dataframe(summary_tbl.style.format({
-                "평균가": "{:,.0f}", "중앙가": "{:,.0f}", "표준편차": "{:,.0f}", "최저가": "{:,.0f}", "최고가": "{:,.0f}"
-            }), use_container_width=True)
+            if errors:
+                for err in errors:
+                    st.error(err)
+                    
+            if df_shop_trend.empty:
+                st.info("수집된 쇼핑 데이터가 없습니다.")
+            else:
+                # lprice 타입 정제
+                df_shop_trend["lprice"] = pd.to_numeric(df_shop_trend["lprice"], errors='coerce').fillna(0)
+                # productType 타입 정제
+                df_shop_trend["productType"] = pd.to_numeric(df_shop_trend["productType"], errors='coerce').fillna(2)
+                
+                # 상품군 매핑 정의 (가이드 문서 기준)
+                type_mapping = {
+                    1: "일반 - 가격비교 매칭",
+                    2: "일반 - 가격비교 비매칭",
+                    3: "일반 - 가격비교 매칭 일반",
+                    4: "중고 - 가격비교 매칭",
+                    5: "중고 - 가격비교 비매칭",
+                    6: "중고 - 가격비교 매칭 일반",
+                    7: "단종 - 가격비교 매칭",
+                    8: "단종 - 가격비교 비매칭",
+                    9: "단종 - 가격비교 매칭 일반",
+                    10: "판매예정 - 가격비교 매칭",
+                    11: "판매예정 - 가격비교 비매칭",
+                    12: "판매예정 - 가격비교 매칭 일반"
+                }
+                
+                df_shop_trend["상품유형"] = df_shop_trend["productType"].map(type_mapping).fillna("기타/비매칭")
+                
+                # 상품 대분류군 묶기
+                def get_group(ptype):
+                    if ptype in [1, 2, 3]: return "일반상품"
+                    elif ptype in [4, 5, 6]: return "중고상품"
+                    elif ptype in [7, 8, 9]: return "단종상품"
+                    elif ptype in [10, 11, 12]: return "판매예정상품"
+                    return "기타"
+                df_shop_trend["상품대그룹"] = df_shop_trend["productType"].apply(get_group)
+                
+                # 가격비교 여부 묶기
+                def get_comparison(ptype):
+                    if ptype in [1, 4, 7, 10]: return "가격비교 상품"
+                    elif ptype in [2, 5, 8, 11]: return "가격비교 비매칭"
+                    return "가격비교 매칭일반"
+                df_shop_trend["가격비교여부"] = df_shop_trend["productType"].apply(get_comparison)
+                
+                # 1) 상품군 분포 분석 시각화
+                col1, col2 = st.columns(2)
+                with col1:
+                    group_counts = df_shop_trend["상품대그룹"].value_counts().reset_index()
+                    fig_group = px.pie(
+                        group_counts,
+                        values="count",
+                        names="상품대그룹",
+                        title="상품 대그룹 분류 비율 (일반 vs 중고 vs 단종 등)"
+                    )
+                    st.plotly_chart(fig_group, use_container_width=True)
+                with col2:
+                    comp_counts = df_shop_trend["가격비교여부"].value_counts().reset_index()
+                    fig_comp = px.pie(
+                        comp_counts,
+                        values="count",
+                        names="가격비교여부",
+                        title="가격비교 서비스 연동 상태 비율"
+                    )
+                    st.plotly_chart(fig_comp, use_container_width=True)
+                    
+                # 2) 상품유형별 가격 트렌드 비교 (Box Plot)
+                st.markdown("---")
+                st.markdown("### 💸 상품유형별 가격 트렌드 분석")
+                
+                fig_trend_box = px.box(
+                    df_shop_trend[df_shop_trend["lprice"] > 0],
+                    x="상품유형",
+                    y="lprice",
+                    color="search_keyword",
+                    title="상세 상품유형별 가격 분포 박스 플롯",
+                    labels={"lprice": "가격 (원)", "상품유형": "상품 상세 유형"}
+                )
+                st.plotly_chart(fig_trend_box, use_container_width=True)
+                
+                # 유형별 데이터 표 요약
+                st.markdown("#### 상품 유형별 통계 요약표")
+                summary_tbl = df_shop_trend[df_shop_trend["lprice"] > 0].groupby(["search_keyword", "상품유형"])["lprice"].agg(
+                    ["count", "mean", "median", "std", "min", "max"]
+                ).rename(columns={
+                    "count": "상품수", "mean": "평균가", "median": "중앙가", "std": "표준편차", "min": "최저가", "max": "최고가"
+                }).reset_index()
+                st.dataframe(summary_tbl.style.format({
+                    "평균가": "{:,.0f}", "중앙가": "{:,.0f}", "표준편차": "{:,.0f}", "최저가": "{:,.0f}", "최고가": "{:,.0f}"
+                }), use_container_width=True)
 
 # ------------------------------------------------------------------------------
 # 7.5 블로그 검색 분석 페이지
