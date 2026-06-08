@@ -92,13 +92,14 @@ def fetch_datalab_trend(client_id, client_secret, keywords_list, start_date, end
                         "keyword": title
                     })
             if df_list:
-                return pd.DataFrame(df_list), None
+                return pd.DataFrame(df_list)
             else:
-                return pd.DataFrame(), "결과 데이터가 비어 있습니다."
+                raise Exception("결과 데이터가 비어 있습니다.")
         else:
-            return pd.DataFrame(), f"오류 발생 (HTTP {response.status_code}): {response.text}"
+            raise Exception(f"오류 발생 (HTTP {response.status_code}): {response.text}")
     except Exception as e:
-        return pd.DataFrame(), f"API 호출 중 예외 발생: {str(e)}"
+        # 캐싱을 차단하기 위해 예외를 상위로 다시 던짐
+        raise e
 
 @st.cache_data(show_spinner=False)
 def fetch_search_data(client_id, client_secret, api_type, query, display=100):
@@ -133,13 +134,13 @@ def fetch_search_data(client_id, client_secret, api_type, query, display=100):
             if items:
                 df = pd.DataFrame(items)
                 df["search_keyword"] = query
-                return df, None
+                return df
             else:
-                return pd.DataFrame(), None  # 검색 결과 없음
+                return pd.DataFrame()  # 검색 결과 없음
         else:
-            return pd.DataFrame(), f"오류 발생 (HTTP {response.status_code}): {response.text}"
+            raise Exception(f"오류 발생 (HTTP {response.status_code}): {response.text}")
     except Exception as e:
-        return pd.DataFrame(), f"API 호출 중 예외 발생: {str(e)}"
+        raise e
 
 def get_merged_search_data(client_id, client_secret, api_type, keywords_list, display=100):
     """
@@ -149,11 +150,12 @@ def get_merged_search_data(client_id, client_secret, api_type, keywords_list, di
     error_msgs = []
     
     for kw in keywords_list:
-        df, err = fetch_search_data(client_id, client_secret, api_type, kw, display)
-        if err:
-            error_msgs.append(f"[{kw}] {err}")
-        elif not df.empty:
-            all_dfs.append(df)
+        try:
+            df = fetch_search_data(client_id, client_secret, api_type, kw, display)
+            if not df.empty:
+                all_dfs.append(df)
+        except Exception as e:
+            error_msgs.append(f"[{kw}] {str(e)}")
             
     if all_dfs:
         return pd.concat(all_dfs, ignore_index=True), error_msgs
@@ -340,17 +342,17 @@ if page == "💡 개요 (Overview)":
         if st.button("연결 테스트 시작"):
             with st.spinner("네이버 API와 통신을 확인하는 중..."):
                 # 블로그 검색 API로 단순 호출 시도
-                df, err = fetch_search_data(
-                    st.session_state["client_id"], 
-                    st.session_state["client_secret"], 
-                    "blog", 
-                    "네이버", 
-                    display=1
-                )
-                if err:
-                    st.error(f"❌ 연결 실패: {err}")
-                else:
+                try:
+                    df = fetch_search_data(
+                        st.session_state["client_id"], 
+                        st.session_state["client_secret"], 
+                        "blog", 
+                        "네이버", 
+                        display=1
+                    )
                     st.success("✅ 네이버 API 인증 및 연결 상태가 정상입니다!")
+                except Exception as e:
+                    st.error(f"❌ 연결 실패: {str(e)}")
     else:
         st.write("사이드바에 API Key를 입력하면 연결 상태를 검증할 수 있는 테스트 버튼이 활성화됩니다.")
 
@@ -374,14 +376,19 @@ elif page == "📈 검색어 트렌드 (DataLab)":
     if not keywords_list:
         st.warning("분석할 검색 키워드를 입력해 주세요.")
     else:
+        df_trend = pd.DataFrame()
+        err = None
         with st.spinner("데이터랩 트렌드 데이터를 수집하는 중..."):
-            df_trend, err = fetch_datalab_trend(
-                st.session_state["client_id"],
-                st.session_state["client_secret"],
-                keywords_list,
-                start_date,
-                end_date
-            )
+            try:
+                df_trend = fetch_datalab_trend(
+                    st.session_state["client_id"],
+                    st.session_state["client_secret"],
+                    keywords_list,
+                    start_date,
+                    end_date
+                )
+            except Exception as e:
+                err = str(e)
             
         if err:
             st.error(err)
