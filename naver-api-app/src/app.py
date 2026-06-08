@@ -55,8 +55,8 @@ def fetch_datalab_trend(client_id, client_secret, keywords_list, start_date, end
     """
     url = "https://openapi.naver.com/v1/datalab/search"
     headers = {
-        "X-Naver-Client-Id": client_id,
-        "X-Naver-Client-Secret": client_secret,
+        "X-Naver-Client-Id": client_id.strip(),
+        "X-Naver-Client-Secret": client_secret.strip(),
         "Content-Type": "application/json"
     }
     
@@ -117,8 +117,8 @@ def fetch_search_data(client_id, client_secret, api_type, query, display=100):
         
     url = f"https://openapi.naver.com/v1/search/{endpoint_map[api_type]}"
     headers = {
-        "X-Naver-Client-Id": client_id,
-        "X-Naver-Client-Secret": client_secret
+        "X-Naver-Client-Id": client_id.strip(),
+        "X-Naver-Client-Secret": client_secret.strip()
     }
     params = {
         "query": query,
@@ -268,9 +268,9 @@ with st.sidebar:
     
     # 세션 상태 갱신
     if client_id_input != st.session_state["client_id"]:
-        st.session_state["client_id"] = client_id_input
+        st.session_state["client_id"] = client_id_input.strip()
     if client_secret_input != st.session_state["client_secret"]:
-        st.session_state["client_secret"] = client_secret_input
+        st.session_state["client_secret"] = client_secret_input.strip()
         
     st.markdown("---")
     
