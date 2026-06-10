@@ -13,6 +13,7 @@
 작성자: Antigravity AI
 생성일: 2026-06-08
 """
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -22,6 +23,11 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from sklearn.feature_extraction.text import TfidfVectorizer
 import re
+from dotenv import load_dotenv
+
+# .env 파일 로드 (src 디렉토리 기준 상위 폴더인 naver-api-app 아래의 .env 파일 로드)
+dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+load_dotenv(dotenv_path=dotenv_path)
 
 # ==============================================================================
 # 1. 페이지 설정 및 초기화
@@ -33,11 +39,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 세션 상태 초기화 (API 키 저장용)
-if "client_id" not in st.session_state:
-    st.session_state["client_id"] = ""
-if "client_secret" not in st.session_state:
-    st.session_state["client_secret"] = ""
+# 세션 상태에 .env 파일의 API 키 설정 적용 (매 렌더링마다 .env 최신값을 반영)
+st.session_state["client_id"] = os.getenv("NAVER_CLIENT_ID", "")
+st.session_state["client_secret"] = os.getenv("NAVER_CLIENT_SECRET", "")
 
 # 한국어 형태소 분석기 대안: 단순 단어 추출용 정규식 토크나이저
 def simple_tokenizer(text):
@@ -319,26 +323,12 @@ def analyze_tfidf_keywords(df, text_cols):
 with st.sidebar:
     st.title("⚙️ 설정 및 입력")
     
-    # 5.1 API Key 입력 받기
+    # 5.1 API Key 설정 정보 표시
     st.subheader("🔑 네이버 API 키 설정")
-    client_id_input = st.text_input(
-        "Client ID", 
-        value=st.session_state["client_id"], 
-        type="password",
-        help="네이버 개발자 센터에서 발급받은 Client ID를 입력하세요."
-    )
-    client_secret_input = st.text_input(
-        "Client Secret", 
-        value=st.session_state["client_secret"], 
-        type="password",
-        help="네이버 개발자 센터에서 발급받은 Client Secret을 입력하세요."
-    )
-    
-    # 세션 상태 갱신
-    if client_id_input != st.session_state["client_id"]:
-        st.session_state["client_id"] = client_id_input.strip()
-    if client_secret_input != st.session_state["client_secret"]:
-        st.session_state["client_secret"] = client_secret_input.strip()
+    if st.session_state["client_id"] and st.session_state["client_secret"]:
+        st.success("✅ .env 파일로부터 API 키가 로드되었습니다.")
+    else:
+        st.error("❌ .env 파일에 API 키가 설정되지 않았습니다.")
         
     st.markdown("---")
     
