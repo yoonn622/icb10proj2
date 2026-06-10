@@ -26,8 +26,10 @@ import re
 from dotenv import load_dotenv
 
 # .env 파일 로드 (src 디렉토리 기준 상위 폴더인 naver-api-app 아래의 .env 파일 로드)
+# 단, Streamlit Cloud 배포 환경 등 .env 파일이 없는 경우에는 오류 없이 넘어감
 dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
-load_dotenv(dotenv_path=dotenv_path)
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path=dotenv_path)
 
 # ==============================================================================
 # 1. 페이지 설정 및 초기화
@@ -39,9 +41,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 세션 상태에 .env 파일의 API 키 설정 적용 (매 렌더링마다 .env 최신값을 반영)
-st.session_state["client_id"] = os.getenv("NAVER_CLIENT_ID", "")
-st.session_state["client_secret"] = os.getenv("NAVER_CLIENT_SECRET", "")
+# 1.1 API Key 설정 (Streamlit Secrets 또는 로컬 환경변수/.env 로드)
+client_id = ""
+client_secret = ""
+
+# Streamlit secrets 검사 후 우선 로드
+if "NAVER_CLIENT_ID" in st.secrets:
+    client_id = st.secrets["NAVER_CLIENT_ID"]
+elif os.getenv("NAVER_CLIENT_ID"):
+    client_id = os.getenv("NAVER_CLIENT_ID")
+
+if "NAVER_CLIENT_SECRET" in st.secrets:
+    client_secret = st.secrets["NAVER_CLIENT_SECRET"]
+elif os.getenv("NAVER_CLIENT_SECRET"):
+    client_secret = os.getenv("NAVER_CLIENT_SECRET")
+
+# 세션 상태에 API 키 설정 적용 (매 렌더링마다 최신값 반영)
+st.session_state["client_id"] = client_id.strip() if client_id else ""
+st.session_state["client_secret"] = client_secret.strip() if client_secret else ""
 
 # 한국어 형태소 분석기 대안: 단순 단어 추출용 정규식 토크나이저
 def simple_tokenizer(text):

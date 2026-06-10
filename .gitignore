@@ -71,3 +71,6 @@ Thumbs.db
 # --- 숨김 파일 및 폴더 ---
 .*
 !.gitignore
+!**/.streamlit/
+.streamlit/secrets.toml
+**/secrets.toml
