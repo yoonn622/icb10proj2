@@ -4,6 +4,7 @@
 주요 기능:
 - 네이버 API 인증 키(Client ID, Client Secret) 입력 및 관리
 - 통합 검색어 트렌드(DataLab) 조회 및 분석
+- 단일/복수 검색어 기반의 통합 종합 분석(Unified Dashboard) 대시보드 제공
 - 네이버 쇼핑 검색 기반 가격 분포, 쇼핑몰, 카테고리/제조사 점유율 분석
 - 상품군 타입(productType)을 활용한 다차원 쇼핑 트렌드 분석
 - 블로그, 카페글, 뉴스 검색 결과 수집 및 시간적 발행 추이 분석
@@ -12,6 +13,7 @@
 
 작성자: Antigravity AI
 생성일: 2026-06-08
+수정일: 2026-06-13
 """
 import os
 import streamlit as st
@@ -374,6 +376,7 @@ with st.sidebar:
         "🖥️ 분석 페이지 선택",
         options=[
             "💡 개요 (Overview)",
+            "🌐 종합 분석 (Unified Dashboard)",
             "📈 검색어 트렌드 (DataLab)",
             "🛍️ 쇼핑 검색 분석",
             "📊 쇼핑 트렌드 분석",
@@ -438,6 +441,243 @@ if page == "💡 개요 (Overview)":
     - **카페글 검색**: 카페글 검색 API (`/v1/search/cafearticle.json`, 일 한도 25,000회)
     - **뉴스 검색**: 뉴스 검색 API (`/v1/search/news.json`, 일 한도 25,000회)
     """)
+
+# ------------------------------------------------------------------------------
+# 7.1.5 종합 분석 (Unified Dashboard) 페이지
+# ------------------------------------------------------------------------------
+elif page == "🌐 종합 분석 (Unified Dashboard)":
+    st.title("🌐 종합 분석 (Unified Dashboard)")
+    st.markdown("단일/복수 검색 키워드에 대해 데이터랩 트렌드, 블로그, 카페글, 뉴스, 쇼핑 데이터를 일괄 수집하여 통합적인 여론 및 트렌드 인사이트를 제공합니다.")
+
+    if not keywords_list:
+        st.warning("분석할 검색 키워드를 입력해 주세요.")
+    else:
+        # 데이터 수집 진행 상황을 알리기 위한 스피너
+        with st.spinner("네이버 API 전체 채널(트렌드, 쇼핑, 블로그, 카페, 뉴스) 데이터를 일괄 수집하는 중..."):
+            # 1. 데이터랩 검색어 트렌드 수집
+            df_trend = pd.DataFrame()
+            try:
+                df_trend = fetch_datalab_trend(
+                    st.session_state["client_id"],
+                    st.session_state["client_secret"],
+                    keywords_list,
+                    start_date,
+                    end_date
+                )
+            except Exception as e:
+                st.error(f"검색어 트렌드 수집 실패: {str(e)}")
+
+            # 2. 쇼핑 데이터 수집 (50개씩 제한하여 API 호출 속도 개선)
+            df_shop, shop_errs = get_merged_search_data(
+                st.session_state["client_id"], st.session_state["client_secret"], "shop", keywords_list, display=50
+            )
+            # 3. 블로그 데이터 수집
+            df_blog, blog_errs = get_merged_search_data(
+                st.session_state["client_id"], st.session_state["client_secret"], "blog", keywords_list, display=50
+            )
+            # 4. 카페 데이터 수집
+            df_cafe, cafe_errs = get_merged_search_data(
+                st.session_state["client_id"], st.session_state["client_secret"], "cafearticle", keywords_list, display=50
+            )
+            # 5. 뉴스 데이터 수집
+            df_news, news_errs = get_merged_search_data(
+                st.session_state["client_id"], st.session_state["client_secret"], "news", keywords_list, display=50
+            )
+
+        # 수집 에러 발생 시 경고 출력
+        all_errs = shop_errs + blog_errs + cafe_errs + news_errs
+        if all_errs:
+            with st.expander("⚠️ 일부 데이터 수집 과정에서 에러가 발생했습니다."):
+                for err in all_errs:
+                    st.warning(err)
+
+        # 분기 A: 단일 키워드 입력 시
+        if len(keywords_list) == 1:
+            target_kw = keywords_list[0]
+            st.subheader(f"🔍 '{target_kw}' 통합 검색 결과 요약")
+
+            # KPI 메트릭스 표시
+            col1, col2, col3, col4, col5 = st.columns(5)
+            with col1:
+                st.metric("블로그 포스트", f"{len(df_blog)} 개" if not df_blog.empty else "0 개")
+            with col2:
+                st.metric("카페 게시글", f"{len(df_cafe)} 개" if not df_cafe.empty else "0 개")
+            with col3:
+                st.metric("뉴스 기사", f"{len(df_news)} 개" if not df_news.empty else "0 개")
+            with col4:
+                st.metric("쇼핑 상품 수", f"{len(df_shop)} 개" if not df_shop.empty else "0 개")
+            with col5:
+                if not df_shop.empty:
+                    df_shop["lprice"] = pd.to_numeric(df_shop["lprice"], errors='coerce').fillna(0)
+                    avg_price = df_shop[df_shop["lprice"] > 0]["lprice"].mean()
+                    st.metric("쇼핑 평균가", f"{avg_price:,.0f} 원")
+                else:
+                    st.metric("쇼핑 평균가", "N/A")
+
+            # 1행 시각화: 트렌드 차트
+            st.markdown("---")
+            if not df_trend.empty:
+                fig_trend = px.line(
+                    df_trend, x="period", y="ratio",
+                    title=f"'{target_kw}' 검색어 트렌드 추이 (상대 비율)",
+                    labels={"period": "날짜", "ratio": "검색량 비율 (%)"}
+                )
+                fig_trend.update_layout(hovermode="x unified")
+                st.plotly_chart(fig_trend, use_container_width=True)
+
+            # 2행 시각화: 통합 TF-IDF 여론 분석
+            st.markdown("### 🗣️ 통합 여론 및 텍스트 키워드 분석 (TF-IDF)")
+            # 블로그, 카페, 뉴스 텍스트 병합
+            combined_dfs = []
+            if not df_blog.empty: combined_dfs.append(df_blog[["title", "description"]])
+            if not df_cafe.empty: combined_dfs.append(df_cafe[["title", "description"]])
+            if not df_news.empty: combined_dfs.append(df_news[["title", "description"]])
+
+            if combined_dfs:
+                df_all_text = pd.concat(combined_dfs, ignore_index=True)
+                with st.spinner("종합 TF-IDF 분석 수행 중..."):
+                    tfidf_df = analyze_tfidf_keywords(df_all_text, ["title", "description"])
+                
+                if not tfidf_df.empty:
+                    col_tf_chart, col_tf_tbl = st.columns([2, 1])
+                    with col_tf_chart:
+                        fig_tfidf = px.bar(
+                            tfidf_df.head(15), x="TF-IDF 점수", y="키워드", orientation="h",
+                            title=f"'{target_kw}' 핵심 관심사 키워드 Top 15 (블로그+카페+뉴스)",
+                            color="TF-IDF 점수"
+                        )
+                        fig_tfidf.update_layout(yaxis={'categoryorder': 'total ascending'})
+                        st.plotly_chart(fig_tfidf, use_container_width=True)
+                    with col_tf_tbl:
+                        st.markdown("#### 통합 핵심 키워드 Top 30")
+                        st.dataframe(tfidf_df, use_container_width=True)
+                else:
+                    st.info("수집된 텍스트가 부족하여 여론 분석을 생성할 수 없습니다.")
+            else:
+                st.info("여론 분석을 위한 소셜/뉴스 텍스트 데이터가 존재하지 않습니다.")
+
+            # 3행 시각화: 쇼핑 및 도메인 분석
+            st.markdown("---")
+            col_shop_dist, col_media_share = st.columns(2)
+            with col_shop_dist:
+                st.markdown("#### 🛍️ 쇼핑몰 등록 비중")
+                if not df_shop.empty:
+                    mall_counts = df_shop["mallName"].value_counts().head(10).reset_index()
+                    fig_mall = px.pie(mall_counts, values="count", names="mallName", title="인기 쇼핑몰 점유율")
+                    st.plotly_chart(fig_mall, use_container_width=True)
+                else:
+                    st.info("쇼핑 데이터가 없습니다.")
+            with col_media_share:
+                st.markdown("#### 📰 뉴스 언론사 보도 점유율")
+                if not df_news.empty:
+                    def extract_domain(url):
+                        if not url: return "기타"
+                        match = re.search(r'https?://([^/]+)', url)
+                        return match.group(1).replace("www.", "") if match else "기타"
+                    df_news["언론사도메인"] = df_news["originallink"].apply(extract_domain)
+                    media_counts = df_news["언론사도메인"].value_counts().head(10).reset_index()
+                    fig_media = px.pie(media_counts, values="count", names="언론사도메인", title="뉴스 보도 매체 점유율")
+                    st.plotly_chart(fig_media, use_container_width=True)
+                else:
+                    st.info("뉴스 데이터가 없습니다.")
+
+        # 분기 B: 복수 키워드 입력 시
+        else:
+            st.subheader("🌐 다중 키워드 교차 비교 분석")
+
+            # 1. 트렌드 비교 라인 차트
+            if not df_trend.empty:
+                fig_trend = px.line(
+                    df_trend, x="period", y="ratio", color="keyword",
+                    title="키워드별 네이버 통합 검색어 트렌드 비교 (상대 비율)",
+                    labels={"period": "날짜", "ratio": "검색량 비율 (%)", "keyword": "키워드"}
+                )
+                fig_trend.update_layout(hovermode="x unified")
+                st.plotly_chart(fig_trend, use_container_width=True)
+
+            # 2. 플랫폼별 언급량 비교 그룹형 막대 차트 (사용자 픽!)
+            st.markdown("---")
+            st.markdown("### 📊 플랫폼별 언급량 및 수집량 비교")
+            
+            # 데이터 수집량 계산 요약
+            comparative_data = []
+            for kw in keywords_list:
+                blog_cnt = len(df_blog[df_blog["search_keyword"] == kw]) if not df_blog.empty else 0
+                cafe_cnt = len(df_cafe[df_cafe["search_keyword"] == kw]) if not df_cafe.empty else 0
+                news_cnt = len(df_news[df_news["search_keyword"] == kw]) if not df_news.empty else 0
+                shop_cnt = len(df_shop[df_shop["search_keyword"] == kw]) if not df_shop.empty else 0
+                
+                comparative_data.append({"키워드": kw, "플랫폼": "블로그", "수집량": blog_cnt})
+                comparative_data.append({"키워드": kw, "플랫폼": "카페", "수집량": cafe_cnt})
+                comparative_data.append({"키워드": kw, "플랫폼": "뉴스", "수집량": news_cnt})
+                comparative_data.append({"키워드": kw, "플랫폼": "쇼핑", "수집량": shop_cnt})
+                
+            df_compare = pd.DataFrame(comparative_data)
+            
+            fig_compare = px.bar(
+                df_compare, x="키워드", y="수집량", color="플랫폼", barmode="group",
+                title="키워드별 플랫폼별 수집량 비교",
+                labels={"수집량": "문서 및 상품 수 (개)"}
+            )
+            st.plotly_chart(fig_compare, use_container_width=True)
+
+            # 3. 키워드별 통합 여론(TF-IDF) 교차 비교
+            st.markdown("---")
+            st.markdown("### 🗣️ 키워드별 소셜/뉴스 통합 여론 분석 (TF-IDF)")
+            
+            # 탭을 활용하여 키워드별 TF-IDF를 바로 전환하며 볼 수 있게 함
+            kw_tabs = st.tabs([f"🔑 {kw}" for kw in keywords_list])
+            for idx, kw in enumerate(keywords_list):
+                with kw_tabs[idx]:
+                    # 각 키워드 텍스트 추출
+                    kw_blog = df_blog[df_blog["search_keyword"] == kw] if not df_blog.empty else pd.DataFrame()
+                    kw_cafe = df_cafe[df_cafe["search_keyword"] == kw] if not df_cafe.empty else pd.DataFrame()
+                    kw_news = df_news[df_news["search_keyword"] == kw] if not df_news.empty else pd.DataFrame()
+                    
+                    combined_dfs_kw = []
+                    if not kw_blog.empty: combined_dfs_kw.append(kw_blog[["title", "description"]])
+                    if not kw_cafe.empty: combined_dfs_kw.append(kw_cafe[["title", "description"]])
+                    if not kw_news.empty: combined_dfs_kw.append(kw_news[["title", "description"]])
+                    
+                    if combined_dfs_kw:
+                        df_all_text_kw = pd.concat(combined_dfs_kw, ignore_index=True)
+                        tfidf_df_kw = analyze_tfidf_keywords(df_all_text_kw, ["title", "description"])
+                        
+                        if not tfidf_df_kw.empty:
+                            col_tf_chart_kw, col_tf_tbl_kw = st.columns([2, 1])
+                            with col_tf_chart_kw:
+                                fig_tfidf_kw = px.bar(
+                                    tfidf_df_kw.head(15), x="TF-IDF 점수", y="키워드", orientation="h",
+                                    title=f"'{kw}' 통합 관심 핵심 키워드 Top 15 (블로그+카페+뉴스)",
+                                    color="TF-IDF 점수"
+                                )
+                                fig_tfidf_kw.update_layout(yaxis={'categoryorder': 'total ascending'})
+                                st.plotly_chart(fig_tfidf_kw, use_container_width=True)
+                            with col_tf_tbl_kw:
+                                st.markdown(f"#### '{kw}' 키워드 Top 30")
+                                st.dataframe(tfidf_df_kw, use_container_width=True)
+                        else:
+                            st.info("텍스트 정보가 부족하여 TF-IDF 분석을 진행할 수 없습니다.")
+                    else:
+                        st.info("해당 키워드로 수집된 소셜/뉴스 텍스트 데이터가 없습니다.")
+
+            # 4. 쇼핑 가격 분포 비교 (Box Plot)
+            st.markdown("---")
+            st.markdown("### 🛍️ 쇼핑 가격 분포 교차 비교")
+            if not df_shop.empty:
+                df_shop["lprice"] = pd.to_numeric(df_shop["lprice"], errors='coerce').fillna(0)
+                df_shop_filtered = df_shop[df_shop["lprice"] > 0]
+                if not df_shop_filtered.empty:
+                    fig_price_compare = px.box(
+                        df_shop_filtered, x="search_keyword", y="lprice", color="search_keyword",
+                        title="키워드별 상품 최저가 분포 비교 (Box Plot)",
+                        labels={"lprice": "가격 (원)", "search_keyword": "키워드"}
+                    )
+                    st.plotly_chart(fig_price_compare, use_container_width=True)
+                else:
+                    st.info("유효한 가격 정보를 가진 상품이 없습니다.")
+            else:
+                st.info("쇼핑 데이터가 없습니다.")
 
 # ------------------------------------------------------------------------------
 # 7.2 검색어 트렌드 (DataLab) 페이지
