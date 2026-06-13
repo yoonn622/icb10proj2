@@ -1,3 +1,28 @@
+# 📈 네이버 API 다차원 통계 분석 대시보드
+
+네이버 API(통합 검색어 트렌드, 쇼핑인사이트 등)를 활용하여 다차원 데이터를 시각화하고 분석할 수 있는 Streamlit 대시보드 프로젝트입니다.
+
+---
+
+### 🔗 Streamlit 대시보드 접속 주소
+- **URL**: [https://icb10proj2-uudthtnbhehnyna35b48pk.streamlit.app/](https://icb10proj2-uudthtnbhehnyna35b48pk.streamlit.app/)
+
+---
+
+### 🛠️ 최근 프로젝트 작업 내역
+- **Git 자동 푸시 환경 구축** (2026-06-13)
+  - `post-commit` 훅을 설정하여 로컬에서 커밋 완료 시 자동으로 원격 저장소(`origin`)에 push되도록 연동 완료.
+- **Streamlit 배포 설정 및 보안 최적화**
+  - Streamlit Cloud 배포 설정 추가 및 Secrets 로드 연동.
+  - `.env` 파일 및 Secrets를 통한 네이버 API 키 자동 로드 로직 구현.
+- **네이버 API 다차원 통계 분석 대시보드 개발 (`app.py`)**
+  - 쇼핑인사이트 카테고리 클릭 트렌드(cid) 분석 기능 추가.
+  - API 호출 시 키 입력 공백 제거(`strip`) 및 에러 발생 시 캐싱 방지 로직 적용하여 안정성 강화.
+- **문서화 작업**
+  - 네이버 API 가이드 및 5개 API 명세 요약 문서 추가.
+
+---
+
 ## STEP 0. 팀 구성 및 협업 환경 세팅
 
 ### 슬랙 세팅
