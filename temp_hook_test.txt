@@ -1,0 +1,1 @@
+Git post-commit hook 자동 푸시 테스트 파일입니다.
