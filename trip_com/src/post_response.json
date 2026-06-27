@@ -1,0 +1,1435 @@
+{
+    "data": {
+        "commentTagList": [
+            {
+                "id": 77,
+                "name": "편리한 교통",
+                "commentCount": 23,
+                "type": 1
+            },
+            {
+                "id": 97,
+                "name": "편리한 위치",
+                "commentCount": 18,
+                "type": 1
+            },
+            {
+                "id": 84,
+                "name": "친절한 프런트 데스크 직원",
+                "commentCount": 15,
+                "type": 1
+            },
+            {
+                "id": 53,
+                "name": "다양한 시설",
+                "commentCount": 12,
+                "type": 1
+            },
+            {
+                "id": 96,
+                "name": "지하철과 가까움",
+                "commentCount": 12,
+                "type": 1
+            },
+            {
+                "id": 149,
+                "name": "다시 오고 싶은 곳",
+                "commentCount": 11,
+                "type": 1
+            },
+            {
+                "id": 35,
+                "name": "TV 좋음",
+                "commentCount": 9,
+                "type": 1
+            },
+            {
+                "id": 139,
+                "name": "수하물 배송서비스",
+                "commentCount": 8,
+                "type": 1
+            }
+        ],
+        "travelTypeList": [
+            {
+                "name": "모든 여행자",
+                "commentCount": -1
+            },
+            {
+                "id": 10,
+                "name": "출장객",
+                "commentCount": 9
+            },
+            {
+                "id": 30,
+                "name": "가족 단위",
+                "commentCount": 12
+            },
+            {
+                "id": 50,
+                "name": "1인 여행자",
+                "commentCount": 75
+            },
+            {
+                "id": 60,
+                "name": "대리 예약",
+                "commentCount": 2
+            },
+            {
+                "id": 70,
+                "name": "커플",
+                "commentCount": 29
+            },
+            {
+                "id": 40,
+                "name": "친구와 여행",
+                "commentCount": 42
+            },
+            {
+                "id": 0,
+                "name": "기타",
+                "commentCount": 7
+            }
+        ],
+        "roomList": [
+            {
+                "name": "모든 객실 유형",
+                "commentCount": -1
+            },
+            {
+                "id": 550431162,
+                "name": "APL 미니 - 주차불가",
+                "commentCount": 129
+            },
+            {
+                "id": 550431809,
+                "name": "APL 스탠다드 - 주차불가",
+                "commentCount": 32
+            },
+            {
+                "id": 550432307,
+                "name": "APL 디럭스 컴포트 - 주차불가",
+                "commentCount": 15
+            }
+        ],
+        "languageTypeList": [
+            {
+                "name": "모든 언어",
+                "commentCount": -1
+            },
+            {
+                "id": 5,
+                "name": "한국어",
+                "commentCount": 22
+            },
+            {
+                "id": 2,
+                "name": "영어",
+                "commentCount": 24
+            },
+            {
+                "id": 3,
+                "name": "중국어",
+                "commentCount": 87
+            },
+            {
+                "id": 4,
+                "name": "일본어",
+                "commentCount": 40
+            },
+            {
+                "id": 11,
+                "name": "태국어",
+                "commentCount": 2
+            },
+            {
+                "id": 17,
+                "name": "네덜란드어",
+                "commentCount": 1
+            }
+        ],
+        "totalCountForPage": 159,
+        "groupList": [
+            {
+                "dataType": 7,
+                "commentList": [
+                    {
+                        "id": 1981596416,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "익명 사용자",
+                            "avatarUrl": "/0AS27120009wz6aovB7AA.png",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/0AS27120009wz6aovB7AA_C_130_130_Q70.png",
+                            "regionName": "일본",
+                            "regionCode": "JP",
+                            "commentCount": 1,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "1개 도시에 발자취를 남기며 1개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 2,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": true,
+                            "levelInfo": {
+                                "curLevelCode": "2",
+                                "curLevelName": "골드",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 2,
+                            "isDefaultAvatar": true,
+                            "avatarBgColor": "#673114",
+                            "avatorLetter": "익",
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0237312000nal0lapD25E.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230w12000nakzuw97325.png"
+                        },
+                        "createDate": "2026-06-12 10:52:11",
+                        "checkinDate": "2026-06-01 00:00:00",
+                        "content": "モーテル街にあり不安でしたが、中は綺麗で思っていたより良かったです！\nは2人だと部屋はキャリー開けたら狭そうですが…テレビも大きくYouTube、ネトフリと観れました！",
+                        "language": "ja",
+                        "source": 1,
+                        "translatedContent": "모텔촌에 있어서 좀 불안했는데, 안은 깨끗하고 생각보다 좋았어요! 둘이 쓰기에는 캐리어 펼치면 방이 좁을 것 같긴 한데... TV도 크고 유튜브, 넷플릭스도 볼 수 있어서 좋았어요!",
+                        "translatedLanguage": "ko",
+                        "translatedSource": "GM",
+                        "translatedSourceText": "AI로 번역된 정보입니다",
+                        "travelType": 50,
+                        "travelTypeText": "1인 여행자",
+                        "rating": 8,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 8,
+                            "ratingLocation": 8,
+                            "ratingFacility": 8,
+                            "ratingService": 8,
+                            "ratingRoom": 8,
+                            "commentLevel": "아주 좋음"
+                        },
+                        "recommend": true,
+                        "imageList": [
+                            "/0230v224x99m1rd2g822A.jpg",
+                            "/0230h224x99m1rwi8C50C.jpg"
+                        ],
+                        "imageCuttingsList": [
+                            {
+                                "imageID": 678405822,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/0230v224x99m1rd2g822A_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/0230v224x99m1rd2g822A_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/0230v224x99m1rd2g822A_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 12,
+                                "picTypeName": "周边",
+                                "qualityScore": 4.4672
+                            },
+                            {
+                                "imageID": 678405824,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/0230h224x99m1rwi8C50C_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/0230h224x99m1rwi8C50C_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/0230h224x99m1rwi8C50C_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 5,
+                                "picTypeName": "其他",
+                                "qualityScore": 4.268
+                            }
+                        ],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-06-14 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "feedbackSecurityKey": "QG1QhIbnhQYOBtkMM50D3SqGv70mzRj3Ne3GCqNXshs=_review_1981596416",
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1990683257,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "CC16789",
+                            "avatarUrl": "/Z80o13000000txghi4C8B.jpg",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/Z80o13000000txghi4C8B_C_130_130_Q70.jpg",
+                            "regionName": "중국",
+                            "regionCode": "CN",
+                            "commentCount": 41,
+                            "grade": {
+                                "grade": 3,
+                                "title": "리뷰 전문가",
+                                "desc": "리뷰를 30개 이상 작성한 사용자"
+                            },
+                            "trace": "52개 도시에 발자취를 남기며 39개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 1,
+                            "pictureCount": 24,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": false,
+                            "levelInfo": {
+                                "curLevelCode": "35",
+                                "curLevelName": "金钻贵宾",
+                                "rewardList": [
+                                    {
+                                        "rewardID": "1",
+                                        "categoryName": "免费早餐",
+                                        "totalUsedCount": 2,
+                                        "floatIconUrl": "https://pages.c-ctrip.com/wireless-app/imgs/member_rights/hotel_breakfast.png"
+                                    },
+                                    {
+                                        "rewardID": "2",
+                                        "categoryName": "免费取消",
+                                        "totalUsedCount": 2,
+                                        "floatIconUrl": "https://pages.c-ctrip.com/wireless-app/imgs/member_rights/hotel_cancel.png"
+                                    },
+                                    {
+                                        "rewardID": "3",
+                                        "categoryName": "延迟退房",
+                                        "totalUsedCount": 2,
+                                        "floatIconUrl": "https://pages.c-ctrip.com/wireless-app/imgs/member_rights/hotel_delay.png"
+                                    },
+                                    {
+                                        "rewardID": "4",
+                                        "categoryName": "房型升级",
+                                        "totalUsedCount": 2,
+                                        "floatIconUrl": "https://pages.c-ctrip.com/wireless-app/imgs/member_rights/hotel_update.png"
+                                    }
+                                ],
+                                "discount": 0.85,
+                                "levelType": "CTRIP"
+                            },
+                            "nickNameType": 1,
+                            "isDefaultAvatar": false
+                        },
+                        "createDate": "2026-06-20 01:40:40",
+                        "checkinDate": "2026-06-01 00:00:00",
+                        "content": "整體還不錯 很乾凈，不過就是晚上10點後才能入住不是方便。地理位置超級好周邊全是吃的",
+                        "language": "zh",
+                        "source": 1,
+                        "translatedContent": "전반적으로 괜찮았고 아주 깨끗했어요. 다만 밤 10시 이후에야 체크인할 수 있는 점은 불편했습니다. 위치는 정말 최고였어요. 주변에 먹을거리가 가득했거든요.",
+                        "translatedLanguage": "ko",
+                        "translatedSource": "GM",
+                        "translatedSourceText": "AI로 번역된 정보입니다",
+                        "travelType": 50,
+                        "travelTypeText": "1인 여행자",
+                        "rating": 10,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 10,
+                            "ratingLocation": 10,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 10,
+                            "commentLevel": "강력 추천"
+                        },
+                        "recommend": true,
+                        "imageList": [
+                            "/0231m12000svfsrhrF85C.jpg"
+                        ],
+                        "imageCuttingsList": [
+                            {
+                                "imageID": 682928689,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/0231m12000svfsrhrF85C_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/0231m12000svfsrhrF85C_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/0231m12000svfsrhrF85C_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 12,
+                                "picTypeName": "周边",
+                                "qualityScore": 4.0632
+                            }
+                        ],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-06-21 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "feedbackSecurityKey": "+LF/Q4ay2JvjfYTqdC0C+KfoZmQsR0TcpbxTB2QSf5AHR6WKZjgqKg==_review_1990683257",
+                        "commendableRewardList": [],
+                        "isTripComment": false,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "ctrip",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1986141700,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "_xxmm.627",
+                            "avatarUrl": "/1i50312000h1rjfqa64C0.jpg",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/1i50312000h1rjfqa64C0_C_130_130_Q70.jpg",
+                            "regionName": "중국대만",
+                            "regionCode": "TW",
+                            "commentCount": 1,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "1개 도시에 발자취를 남기며 1개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 1,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": false,
+                            "levelInfo": {
+                                "curLevelCode": "3",
+                                "curLevelName": "플래티넘",
+                                "levelType": "TRIP"
+                            },
+                            "regularCustomer": "단골 고객",
+                            "nickNameType": 1,
+                            "isDefaultAvatar": true,
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0233z12000nal0ol1D144.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230p12000nakzmfq568A.png"
+                        },
+                        "createDate": "2026-06-16 02:38:10",
+                        "checkinDate": "2026-04-01 00:00:00",
+                        "content": "非常完美！\n房間乾淨 有電梯服務很好 離地鐵站也挺近的 是獨旅的好去處附近也有很多吃的可以吃 走下去也有便利商店 附近還有賣草莓的很好吃",
+                        "language": "zh",
+                        "source": 1,
+                        "translatedContent": "정말 완벽했어요! 방도 깨끗하고 엘리베이터도 있어서 좋았습니다. 서비스도 훌륭했고, 지하철역에서도 가까워서 혼자 여행하기 정말 좋은 곳이었어요. 주변에 먹을 것도 많았고, 아래로 내려가면 편의점도 있었어요. 근처에서 파는 딸기도 정말 맛있었습니다.",
+                        "translatedLanguage": "ko",
+                        "translatedSource": "GM",
+                        "translatedSourceText": "AI로 번역된 정보입니다",
+                        "travelType": 50,
+                        "travelTypeText": "1인 여행자",
+                        "rating": 10,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 10,
+                            "ratingLocation": 10,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 10,
+                            "commentLevel": "강력 추천"
+                        },
+                        "recommend": true,
+                        "imageList": [
+                            "/0234e224x99nl1dlyEA32.jpg"
+                        ],
+                        "imageCuttingsList": [
+                            {
+                                "imageID": 680707170,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/0234e224x99nl1dlyEA32_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/0234e224x99nl1dlyEA32_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/0234e224x99nl1dlyEA32_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 2,
+                                "picTypeName": "餐饮",
+                                "qualityScore": 3.0838
+                            }
+                        ],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-06-16 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "feedbackSecurityKey": "J46q3LjKynI6cYSgliv6MeUl8UbKXGKAj3f+xCu44XUHR6WKZjgqKg==_review_1986141700",
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1939324976,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "익명 사용자",
+                            "avatarUrl": "/0AS27120009wz6aovB7AA.png",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/0AS27120009wz6aovB7AA_C_130_130_Q70.png",
+                            "regionName": "대한민국",
+                            "regionCode": "KR",
+                            "commentCount": 6,
+                            "grade": {
+                                "grade": 2,
+                                "title": "리뷰 준전문가",
+                                "desc": "리뷰를 5~29개 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "2개 도시에 발자취를 남기며 6개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 6,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": true,
+                            "levelInfo": {
+                                "curLevelCode": "3",
+                                "curLevelName": "플래티넘",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 2,
+                            "isDefaultAvatar": false,
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0233z12000nal0ol1D144.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230p12000nakzmfq568A.png"
+                        },
+                        "createDate": "2026-05-07 10:34:48",
+                        "checkinDate": "2026-04-01 00:00:00",
+                        "content": "숙소가 엄청 깔끔하고 좋았어요! 주변에 편의점도 있고 이동하기에도 편해서 잘 골랐다는 생각이 들었어요. 다음에도 이용할 것 같앙",
+                        "language": "ko",
+                        "source": 1,
+                        "travelType": 40,
+                        "travelTypeText": "친구와 여행",
+                        "rating": 10,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 10,
+                            "ratingLocation": 10,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 10,
+                            "commentLevel": "강력 추천"
+                        },
+                        "recommend": true,
+                        "imageList": [
+                            "/02365224x9988oxxk8791.jpg"
+                        ],
+                        "imageCuttingsList": [
+                            {
+                                "imageID": 658602618,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/02365224x9988oxxk8791_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/02365224x9988oxxk8791_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/02365224x9988oxxk8791_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 5,
+                                "picTypeName": "其他",
+                                "qualityScore": 4.6212
+                            }
+                        ],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-05-07 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다!다음 한국 여행에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다!방문해주셔서 진심으로 감사드립니다:)",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1847051580,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "리뷰어",
+                            "avatarUrl": "/1i54p12000h1rhnro8066.jpg",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/1i54p12000h1rhnro8066_C_130_130_Q70.jpg",
+                            "regionName": "대한민국",
+                            "regionCode": "KR",
+                            "commentCount": 1,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "1개 도시에 발자취를 남기며 1개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 1,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": false,
+                            "levelInfo": {
+                                "curLevelCode": "2",
+                                "curLevelName": "골드",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 3,
+                            "isDefaultAvatar": true,
+                            "avatarBgColor": "#6D4DF8",
+                            "avatorLetter": "리",
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0237312000nal0lapD25E.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230w12000nakzuw97325.png"
+                        },
+                        "createDate": "2026-02-16 15:18:10",
+                        "checkinDate": "2026-02-01 00:00:00",
+                        "content": "시설이 깨끗하고 청결해 매우 만족했습니다.\n난방이 따뜻하고 화장실도 방이랑 구분되어 있어서 소음의 불편함 없으며, 화장실 침구 모두 냄새없이 깨끗합니다.\n친구, 가족이랑 같이 가기에도 적합해 다음에 근처 숙소를 잡을때도 이용할 예정입니다.\n(사진은 이용하는 중간에 찍었습니다.)",
+                        "language": "ko",
+                        "source": 1,
+                        "travelType": 40,
+                        "travelTypeText": "친구와 여행",
+                        "rating": 10,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 10,
+                            "ratingLocation": 10,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 10,
+                            "commentLevel": "강력 추천"
+                        },
+                        "recommend": true,
+                        "imageList": [
+                            "/0235g224x98d1yv9d7456.jpg"
+                        ],
+                        "imageCuttingsList": [
+                            {
+                                "imageID": 614944724,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/0235g224x98d1yv9d7456_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/0235g224x98d1yv9d7456_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/0235g224x98d1yv9d7456_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 9,
+                                "picTypeName": "房间",
+                                "qualityScore": 4.4246
+                            }
+                        ],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-02-16 00:00:00",
+                                "content": "소중한 후기 남겨 주셔서 진심으로 감사드립니다!다음 여행에도 이용 부탁 드리며 더 나은 서비스 제공을 위해 최선을 다하겠습니다!방문해두셔서 진심으로 감사드립니다:)",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1949833906,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "장송심",
+                            "avatarUrl": "/1i54r12000h1rf93l0696.jpg",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/1i54r12000h1rf93l0696_C_130_130_Q70.jpg",
+                            "regionName": "대한민국",
+                            "regionCode": "KR",
+                            "commentCount": 18,
+                            "grade": {
+                                "grade": 2,
+                                "title": "리뷰 준전문가",
+                                "desc": "리뷰를 5~29개 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "16개 도시에 발자취를 남기며 17개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 1,
+                            "pictureCount": 28,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": false,
+                            "levelInfo": {
+                                "curLevelCode": "4",
+                                "curLevelName": "다이아몬드",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 1,
+                            "isDefaultAvatar": true,
+                            "avatarBgColor": "#673114",
+                            "avatorLetter": "장",
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0236i12000nal0vn66478.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0236w12000nakzvtl5F9F.png"
+                        },
+                        "createDate": "2026-05-16 16:53:46",
+                        "checkinDate": "2026-05-01 00:00:00",
+                        "content": "가성비에 침궁및객실의 청결이 너무좋았다 \n간만에 깊은숙면을 취했습니다^^!",
+                        "language": "ko",
+                        "source": 1,
+                        "travelType": 10,
+                        "travelTypeText": "출장객",
+                        "rating": 8,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 8,
+                            "ratingLocation": 8,
+                            "ratingFacility": 8,
+                            "ratingService": 6,
+                            "ratingRoom": 10,
+                            "commentLevel": "아주 좋음"
+                        },
+                        "recommend": true,
+                        "imageList": [
+                            "/0230c224x99breb077A25.jpg"
+                        ],
+                        "imageCuttingsList": [
+                            {
+                                "imageID": 663668662,
+                                "imageStatus": 0,
+                                "smallImageUrl": "https://ak-d.tripcdn.com/images/0230c224x99breb077A25_W_350_350_R5_Q70.jpg?proc=autoorient",
+                                "mediumImageUrl": "https://ak-d.tripcdn.com/images/0230c224x99breb077A25_C_600_600_R5_Q70.jpg?proc=autoorient",
+                                "bigImageUrl": "https://ak-d.tripcdn.com/images/0230c224x99breb077A25_W_1280_853_R5_Q70.jpg?proc=autoorient",
+                                "picTypeId": 9,
+                                "picTypeName": "房间",
+                                "qualityScore": 4.09
+                            }
+                        ],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-05-16 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1988101176,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "익명 사용자",
+                            "avatarUrl": "/0AS27120009wz6aovB7AA.png",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/0AS27120009wz6aovB7AA_C_130_130_Q70.png",
+                            "regionName": "미국",
+                            "regionCode": "US",
+                            "commentCount": 1,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "1개 도시에 발자취를 남기며 1개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 0,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": true,
+                            "levelInfo": {
+                                "curLevelCode": "2",
+                                "curLevelName": "골드",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 2,
+                            "isDefaultAvatar": true,
+                            "avatarBgColor": "#673114",
+                            "avatorLetter": "익",
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0237312000nal0lapD25E.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230w12000nakzuw97325.png"
+                        },
+                        "createDate": "2026-06-17 17:32:08",
+                        "checkinDate": "2026-06-01 00:00:00",
+                        "content": "歯ブラシや、スキンケアのアメニティをいただけ、お水もお部屋に4本置かれていました！\nお部屋によって、余白の大きさが違うので、キャリーを広げにくいところもあれば、広げやすいところもあります。\nテーブル・椅子２つ、大きいテレビがありました。\nガウンも人数分用意されており、特にありがたいのがドライヤーの風圧がしっかりあったところです。\nバスアメニティはもちろん、ボディークリームまであり、お部屋・トイレはディフューザーでいい香りでした。\n色味や配置などはとてもおしゃれです。\n入り口にはフリードリンクもありました。\n到着時、お手洗い周辺に髪の毛が残っておりましたが、それくらいはどうでも良く思うほど、満足度が高かったです。ホンデ駅からタクシーで10分ほど、アクセスも問題なかったです。また機会があれば、利用したいです。",
+                        "language": "ja",
+                        "source": 1,
+                        "translatedContent": "칫솔과 스킨케어 어메니티를 제공해주셨고, 생수도 객실에 4병이나 놓여 있었어요! 방마다 공간 활용도가 달라서 캐리어를 펼치기 어려운 곳도 있고 편한 곳도 있었어요. 테이블과 의자 2개, 큰 TV가 있었어요. 가운도 인원수에 맞춰 준비되어 있었고, 특히 드라이어 바람이 세서 좋았습니다. 욕실 어메니티는 물론이고 보디 크림까지 있었고, 객실과 화장실은 디퓨저로 좋은 향기가 났어요. 색감이나 배치는 정말 세련되고 멋있었어요. 입구에는 무료 음료도 있었습니다. 도착했을 때 화장실 주변에 머리카락이 남아 있었지만, 그 정도는 신경 쓰이지 않을 정도로 만족도가 높았습니다. 홍대역에서 택시로 10분 정도 걸려서 접근성도 좋았어요. 다음에 기회가 되면 또 이용하고 싶습니다.",
+                        "translatedLanguage": "ko",
+                        "translatedSource": "GM",
+                        "translatedSourceText": "AI로 번역된 정보입니다",
+                        "travelType": 70,
+                        "travelTypeText": "커플",
+                        "rating": 9,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 9,
+                            "ratingLocation": 8,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 8,
+                            "commentLevel": "훌륭함"
+                        },
+                        "recommend": true,
+                        "imageList": [],
+                        "imageCuttingsList": [],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-06-17 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "feedbackSecurityKey": "b0fquNmoS/aWp4JZv/7sercQBZba6TAK30xBCwR/lC0HR6WKZjgqKg==_review_1988101176",
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1983818710,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "리뷰어",
+                            "avatarUrl": "/1i51v12000h1rjb5x3A86.jpg",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/1i51v12000h1rjb5x3A86_C_130_130_Q70.jpg",
+                            "regionName": "일본",
+                            "regionCode": "JP",
+                            "commentCount": 1,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "2개 도시에 발자취를 남기며 1개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 0,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": false,
+                            "levelInfo": {
+                                "curLevelCode": "3",
+                                "curLevelName": "플래티넘",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 3,
+                            "isDefaultAvatar": true,
+                            "avatarBgColor": "#6D4DF8",
+                            "avatorLetter": "리",
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0233z12000nal0ol1D144.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230p12000nakzmfq568A.png"
+                        },
+                        "createDate": "2026-06-14 07:27:07",
+                        "checkinDate": "2026-06-01 00:00:00",
+                        "content": "チェックインの22時より早く着いてしまいましたが、\nお部屋の用意が出来てるのでと、早めにチェックインさせてくれました！！\nテレビも大きくNetflixも観れて楽しい宿泊になりました！\nまた利用したいです！",
+                        "language": "ja",
+                        "source": 1,
+                        "translatedContent": "체크인 시간인 22시보다 일찍 도착했는데도 불구하고, 방 준비가 되어있다고 미리 체크인 해주셨어요! TV도 크고 넷플릭스도 볼 수 있어서 즐거운 숙박이었습니다! 다음에 또 이용하고 싶어요!",
+                        "translatedLanguage": "ko",
+                        "translatedSource": "GM",
+                        "translatedSourceText": "AI로 번역된 정보입니다",
+                        "travelType": 50,
+                        "travelTypeText": "1인 여행자",
+                        "rating": 10,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 10,
+                            "ratingLocation": 10,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 10,
+                            "commentLevel": "강력 추천"
+                        },
+                        "recommend": true,
+                        "imageList": [],
+                        "imageCuttingsList": [],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-06-14 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "feedbackSecurityKey": "z3b9enyMB2s0SXr9n5eqga2HNVJU4VAIpAXxoAumUa4HR6WKZjgqKg==_review_1983818710",
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1945187572,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "보라짱",
+                            "avatarUrl": "/0a21x224x99l8aswdFE7A.jpg",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/0a21x224x99l8aswdFE7A_C_130_130_Q70.jpg",
+                            "regionName": "대한민국",
+                            "regionCode": "KR",
+                            "commentCount": 1,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "1개 도시에 발자취를 남기며 1개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 0,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": false,
+                            "levelInfo": {
+                                "curLevelCode": "3",
+                                "curLevelName": "플래티넘",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 1,
+                            "isDefaultAvatar": false,
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0233z12000nal0ol1D144.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0230p12000nakzmfq568A.png"
+                        },
+                        "createDate": "2026-05-12 11:45:48",
+                        "checkinDate": "2026-05-01 00:00:00",
+                        "content": "숙소는 위치가 편하고 방도 깨끗했어요, 데스크 직원도 매우 친절했어요. 체크아웃할 때 비가 와서 사장님께서 우산을 두 개나 주셔서 정말 감사했습니다. 덕분에 편하게 이동할 수 있었어요.",
+                        "language": "ko",
+                        "source": 1,
+                        "travelType": 40,
+                        "travelTypeText": "친구와 여행",
+                        "rating": 10,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 10,
+                            "ratingLocation": 10,
+                            "ratingFacility": 10,
+                            "ratingService": 10,
+                            "ratingRoom": 10,
+                            "commentLevel": "강력 추천"
+                        },
+                        "recommend": true,
+                        "imageList": [],
+                        "imageCuttingsList": [],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-05-12 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음 한국 여행에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다!방문해주셔서 진심으로 감사드립니다:)",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 스탠다드 - 주차불가",
+                        "roomID": 550431809,
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    },
+                    {
+                        "id": 1979093922,
+                        "userInfo": {
+                            "userId": "",
+                            "nickName": "익명 사용자",
+                            "avatarUrl": "/0AS27120009wz6aovB7AA.png",
+                            "headPictureUrl": "https://ak-d.tripcdn.com/images/0AS27120009wz6aovB7AA_C_130_130_Q70.png",
+                            "regionName": "일본",
+                            "regionCode": "JP",
+                            "commentCount": 2,
+                            "grade": {
+                                "grade": 1,
+                                "title": "떠오르는 리뷰 스타",
+                                "desc": "1~4개 리뷰를 작성한 사용자. 업그레이드를 원한다면 더 많은 호텔 리뷰를 작성하세요."
+                            },
+                            "trace": "3개 도시에 발자취를 남기며 2개 호텔 리뷰를 남기셨네요",
+                            "usefulCount": 0,
+                            "pictureCount": 0,
+                            "isSimilar": false,
+                            "similarUrl": "",
+                            "isAnonymous": true,
+                            "levelInfo": {
+                                "curLevelCode": "4",
+                                "curLevelName": "다이아몬드",
+                                "levelType": "TRIP"
+                            },
+                            "nickNameType": 2,
+                            "isDefaultAvatar": true,
+                            "avatarBgColor": "#673114",
+                            "avatorLetter": "익",
+                            "memberLevelIcon": "https://dimg04.tripcdn.com/images/0236i12000nal0vn66478.png",
+                            "memberLevelDarkIcon": "https://dimg04.tripcdn.com/images/0236w12000nakzvtl5F9F.png"
+                        },
+                        "createDate": "2026-06-10 05:13:12",
+                        "checkinDate": "2026-06-01 00:00:00",
+                        "content": "とても清潔で落ち着いて休むことができた。テレビがでかくて色々な映像を大画面で見れた。また近くに旅行する際は利用したい。",
+                        "language": "ja",
+                        "source": 1,
+                        "translatedContent": "아주 깨끗해서 편안하게 쉴 수 있었어요. TV가 커서 다양한 영상을 큰 화면으로 볼 수 있었던 점도 좋았습니다. 다음에 근처로 여행 오게 되면 또 이용하고 싶어요.",
+                        "translatedLanguage": "ko",
+                        "translatedSource": "GM",
+                        "translatedSourceText": "AI로 번역된 정보입니다",
+                        "travelType": 50,
+                        "travelTypeText": "1인 여행자",
+                        "rating": 9,
+                        "ratingInfo": {
+                            "fullRating": 10,
+                            "ratingAll": 9,
+                            "ratingLocation": 10,
+                            "ratingFacility": 8,
+                            "ratingService": 10,
+                            "ratingRoom": 8,
+                            "commentLevel": "훌륭함"
+                        },
+                        "recommend": true,
+                        "imageList": [],
+                        "imageCuttingsList": [],
+                        "videoList": [],
+                        "feedbackList": [
+                            {
+                                "type": 3,
+                                "createDate": "2026-06-10 00:00:00",
+                                "content": "소중한 후기를 남겨 주셔서 진심으로 감사드립니다.다음에도 이용 부탁 드리며 더욱 더 나은 서비스 제공을 위해 최선을 다하겠습니다.방문해주셔서 진심으로 감사드립니다!",
+                                "imageCuttingsList": [],
+                                "language": "ko",
+                                "fold": true
+                            }
+                        ],
+                        "usefulCount": 0,
+                        "canMarkUseful": true,
+                        "usefulUserList": [],
+                        "roomName": "APL 미니 - 주차불가",
+                        "roomID": 550431162,
+                        "feedbackSecurityKey": "D3PClMB90wjTzYOIxFVGrPNHHg/BLgJThehW9ciaChkHR6WKZjgqKg==_review_1979093922",
+                        "isTripComment": true,
+                        "shareCommunityStatus": 0,
+                        "status": 3,
+                        "corporationId": "",
+                        "descendOrder": false,
+                        "sourceFromCode": 1,
+                        "sourceName": "English",
+                        "thirdpartyCommentIcon": "",
+                        "thirdpartyCommentIconDark": ""
+                    }
+                ]
+            }
+        ],
+        "repeatCommentCount": 17,
+        "tripRating": "T",
+        "tagType": "DEFAULT",
+        "ratingLevelRules": [
+            {
+                "ratingStart": 7.6,
+                "ratingEnd": 8,
+                "content": "좋음"
+            },
+            {
+                "ratingStart": 8,
+                "ratingEnd": 9,
+                "content": "아주 좋음"
+            },
+            {
+                "ratingStart": 9,
+                "ratingEnd": 9.2,
+                "content": "훌륭함"
+            },
+            {
+                "ratingStart": 9.2,
+                "ratingEnd": 9.4,
+                "content": "훌륭함"
+            },
+            {
+                "ratingStart": 9.4,
+                "ratingEnd": 9.6,
+                "content": "기대 이상"
+            },
+            {
+                "ratingStart": 9.6,
+                "ratingEnd": 9.8,
+                "content": "기대 이상"
+            },
+            {
+                "ratingStart": 9.8,
+                "ratingEnd": 99,
+                "content": "강력 추천"
+            }
+        ],
+        "bannerInfoList": [],
+        "ratingFloatingLayerInfo": {
+            "legendInfoItem": {
+                "sameTypeAvgLegendInfo": [
+                    {
+                        "type": 1,
+                        "description": ""
+                    },
+                    {
+                        "type": 2,
+                        "description": ""
+                    }
+                ],
+                "sameTypeLevelLegendInfo": []
+            },
+            "recommendTagList": [
+                {
+                    "id": 35,
+                    "name": "TV 좋음",
+                    "commentCount": 9,
+                    "type": 1,
+                    "extraInfo": {
+                        "ratio": 0
+                    },
+                    "tagUpperId": 32,
+                    "pscore": 44.01493027272365
+                },
+                {
+                    "id": 139,
+                    "name": "수하물 배송서비스",
+                    "commentCount": 8,
+                    "type": 1,
+                    "extraInfo": {
+                        "ratio": 0
+                    },
+                    "tagUpperId": 100,
+                    "pscore": 35.61112093461234
+                },
+                {
+                    "id": 84,
+                    "name": "친절한 프런트 데스크 직원",
+                    "commentCount": 15,
+                    "type": 1,
+                    "extraInfo": {
+                        "ratio": 0
+                    },
+                    "tagUpperId": 81,
+                    "pscore": 17.09012499495564
+                },
+                {
+                    "id": 42,
+                    "name": "편한 침대",
+                    "commentCount": 7,
+                    "type": 1,
+                    "extraInfo": {
+                        "ratio": 0
+                    },
+                    "tagUpperId": 32,
+                    "pscore": 6.759763822291231
+                },
+                {
+                    "id": 14,
+                    "name": "깨끗함",
+                    "commentCount": 74,
+                    "type": 1,
+                    "extraInfo": {
+                        "topic": "卫生",
+                        "ratio": 0.99,
+                        "sentences": [
+                            "很干净很香",
+                            "确实很干净"
+                        ]
+                    },
+                    "tagUpperId": 14,
+                    "pscore": 2.7531009978065457
+                }
+            ],
+            "negativeTagList": []
+        },
+        "aiSummaryEntities": {
+            "summaryTitleIcon": "https://dimg04.c-ctrip.com/images/0230b12000pvlbn7s1D03.png",
+            "summaryTitleText": "리뷰 요약",
+            "summaryLabelText": "AI 제공",
+            "summaryIcon": "https://dimg04.tripcdn.com/images/0236612000lorsved78CD.png",
+            "excitationText": "",
+            "summaryItemList": [
+                {
+                    "title": "방 청결",
+                    "excitationText": "",
+                    "conclusion": "다수 리뷰에서 방이 깨끗하고 청결하며, 침구, 화장실 등 시설이 냄새 없이 깨끗하다（76개 리뷰 기준）",
+                    "tagIdList": [
+                        14,
+                        15,
+                        16,
+                        20,
+                        31
+                    ],
+                    "positive": true,
+                    "commentNum": 76,
+                    "itemId": "58635410_ko_kr_49ffefbe-1fe3-4268-9c8e-32989b4b3d27"
+                },
+                {
+                    "title": "시설 완비",
+                    "excitationText": "",
+                    "conclusion": "텔레비전, 세탁기, 건조기 등 시설이 마련되어 있어 편리하게 사용 가능하며, 아메니티도 충분히 제공되어 생활에 편리（36개 리뷰 기준）",
+                    "tagIdList": [
+                        12,
+                        32,
+                        33,
+                        35,
+                        53,
+                        145,
+                        164
+                    ],
+                    "positive": true,
+                    "commentNum": 36,
+                    "itemId": "58635410_ko_kr_4852df96-04cf-46da-ac55-818171748060"
+                },
+                {
+                    "title": "서비스 친절",
+                    "excitationText": "",
+                    "conclusion": "데스크 직원이나 스태프가 매우 친절하며, 비가 올 때 우산을 빌려주는 등 따뜻한 서비스를 제공（57개 리뷰 기준）",
+                    "tagIdList": [
+                        81,
+                        83,
+                        84,
+                        139
+                    ],
+                    "positive": true,
+                    "commentNum": 57,
+                    "itemId": "58635410_ko_kr_17c7031c-131a-415f-8d08-1d9c300effdf"
+                },
+                {
+                    "title": "가성비 우수",
+                    "excitationText": "",
+                    "conclusion": "가격 대비 청결도, 위치, 서비스 등이 우수하여 가성비가 높다（14개 리뷰 기준）",
+                    "tagIdList": [
+                        58
+                    ],
+                    "positive": true,
+                    "commentNum": 14,
+                    "itemId": "58635410_ko_kr_9eb6fe73-a446-48e8-93bb-2f8f7238fc35"
+                },
+                {
+                    "title": "손님 제안",
+                    "conclusion": "일부 고객은 제안합니다. 방의 위생 상태 및 청결 문제, 시설 노후화 개선이 필요합니다.（64개 리뷰 기준）",
+                    "tagIdList": [
+                        5014,
+                        5032,
+                        5041,
+                        5053
+                    ],
+                    "positive": false,
+                    "commentNum": 64,
+                    "itemId": "58635410_ko_kr_32ad7bb6-ed68-4ab4-a029-fcc477466ece"
+                }
+            ],
+            "highlightText": [
+                ""
+            ],
+            "sourceTypeText": "트립닷컴의 실제 투숙객 리뷰를 바탕으로 AI가 요약한 콘텐츠입니다. 단, 리뷰 작성 시점과 업데이트 주기에 따라 최신 내용이 반영되지 않을 수 있으니, 중요한 정보는 숙소에 사전 확인해 주세요."
+        },
+        "filteredOutCommentInfo": {
+            "collapsedCommentCount": 17,
+            "commentsBeforeDecorationCount": 199,
+            "commentsDuringTrialOperationCount": 0
+        },
+        "aiSummaryFilterListInfo": [
+            {
+                "id": "6",
+                "name": "사진/동영상 리뷰",
+                "commentCount": 37,
+                "type": 1
+            },
+            {
+                "id": "3",
+                "name": "낮은 평점 리뷰",
+                "commentCount": 8,
+                "type": 1
+            }
+        ],
+        "filterSequenceConfigs": [
+            "sort",
+            "imgVideo",
+            "room",
+            "travel",
+            "language",
+            "tags"
+        ],
+        "commentRating": {
+            "fullRating": 10,
+            "ratingAll": 9.4,
+            "ratingLocation": 9.3,
+            "ratingLocationShowItem": "위치",
+            "ratingFacility": 9.4,
+            "ratingFacilityShowItem": "시설",
+            "ratingService": 9.4,
+            "ratingServiceShowItem": "서비스",
+            "ratingRoom": 9.6,
+            "ratingRoomShowItem": "청결도",
+            "showCommentNum": 176,
+            "showPackageCommentNum": 0,
+            "commentLevel": "기대 이상",
+            "type": 0,
+            "positiveTip": "",
+            "ratingLocationExt": {
+                "sameTypeLevel": 2,
+                "sameTypeAvg": 8.4
+            },
+            "ratingFacilityExt": {
+                "sameTypeLevel": 2,
+                "sameTypeAvg": 8.2
+            },
+            "ratingServiceExt": {
+                "sameTypeLevel": 2,
+                "sameTypeAvg": 8.2
+            },
+            "ratingRoomExt": {
+                "sameTypeLevel": 2,
+                "sameTypeAvg": 8.2
+            },
+            "ratingType": 1,
+            "ratingExcitationIcon": {}
+        },
+        "similarCommentRating": {},
+        "commonStatisticList": [
+            {
+                "id": 1,
+                "name": "모든 리뷰",
+                "commentCount": 176
+            },
+            {
+                "id": 2,
+                "name": "높은 평점 리뷰",
+                "commentCount": 168
+            },
+            {
+                "id": 3,
+                "name": "낮은 평점 리뷰",
+                "commentCount": 8
+            },
+            {
+                "id": 6,
+                "name": "사진/동영상 리뷰",
+                "commentCount": 37
+            }
+        ],
+        "totalCount": 176,
+        "commentRatingType": "UNKNOW",
+        "staticInfo": {
+            "ratingCalculationInfo": {
+                "entranceText": "평점 산출 방법",
+                "title": "평점 산출 방법",
+                "content": "보다 신뢰할 수 있는 평점을 참고하실 수 있도록, 단순한 평균값이 아닌 실제 투숙객의 리뷰와 그 신뢰도를 종합적으로 고려하여 최종 평점을 산출합니다."
+            },
+            "sortItemList": [
+                {
+                    "orderby": 0,
+                    "name": "관련도 높음"
+                },
+                {
+                    "orderby": 1,
+                    "name": "최신 리뷰순"
+                },
+                {
+                    "orderby": 2,
+                    "name": "평점 (높음→낮음)"
+                },
+                {
+                    "orderby": 3,
+                    "name": "평점 (낮음→높음)"
+                }
+            ],
+            "commentExplainText": "검증된 리뷰"
+        },
+        "abtResults": [],
+        "excitationInfoList": [],
+        "selectedCommentPhotosEntities": {}
+    },
+    "ResponseStatus": {
+        "Timestamp": "/Date(1782130777315+800)/",
+        "Ack": "Success",
+        "Errors": [],
+        "Build": "",
+        "Version": "1.0.0",
+        "Extension": [
+            {
+                "Id": "XCtxGwTraceId",
+                "Value": "100025527-0a9ab7f2-495036-1963079"
+            },
+            {
+                "Id": "CLOGGING_TRACE_ID",
+                "Value": ""
+            },
+            {
+                "Id": "TraceLogId",
+                "Value": "100025527-0a9ab7f2-495036-1963079"
+            },
+            {
+                "Id": "XRequestId",
+                "Value": "ddb6c5ca-80bd-46f7-8abd-e5db7b3fb62b"
+            },
+            {
+                "Id": "RootMessageId",
+                "Value": "100025527-0a9ab7f2-495036-1963087"
+            }
+        ]
+    }
+}

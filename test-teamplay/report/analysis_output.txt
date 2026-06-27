@@ -1,0 +1,44 @@
+=== URL 샘플 ===
+ID: 64009, URL: https://kr.iherb.com/pr/california-gold-nutrition-lactobif-30-probiotics-30-billion-cfu-60-veggie-capsules/64009
+ID: 143853, URL: https://kr.iherb.com/pr/california-gold-nutrition-lactobif-30-probiotics-30-billion-cfu-120-veggie-capsules/143853
+ID: 64006, URL: https://kr.iherb.com/pr/california-gold-nutrition-lactobif-5-probiotics-5-billion-cfu-60-veggie-capsules/64006
+ID: 69435, URL: https://kr.iherb.com/pr/california-gold-nutrition-lactobif-100-probiotics-100-billion-cfu-30-veggie-capsules/69435
+ID: 143852, URL: https://kr.iherb.com/pr/california-gold-nutrition-lactobif-5-probiotics-5-billion-cfu-120-veggie-capsules/143852
+
+=== 제형 트렌드 분석 결과 ===
+form_type  count  avg_rating     ratio
+       알약    470    4.723617 58.024691
+       기타    213    4.635211 26.296296
+       구미     59    4.705085  7.283951
+      파우더     43    4.651163  5.308642
+       액상     25    4.720000  3.086420
+
+=== 기능 카테고리별 TOP 5 제품 (리뷰 수 기준) ===
+
+[관절 및 연골 건강]
+1위. [California Gold Nutrition (캘리포니아 골드 뉴트리션)] California Gold Nutrition, OptiMSM® 플레이크, 992g(35oz) | 가격: ₩57,338 | 평점: 4.6 | 리뷰수: 4192 | URL: https://kr.iherb.com/pr/california-gold-nutrition-optimsm-flakes-35-oz-992-g/96328
+2위. [Protocol for Life Balance (프로토콜 포 라이프 밸런스)] Protocol for Life Balance, MSM 함유 글루코사민 & 콘드로이틴, 베지 캡슐 180정 | 가격: ₩38,977 | 평점: 4.8 | 리뷰수: 206 | URL: https://kr.iherb.com/pr/protocol-for-life-balance-glucosamine-chondroitin-with-msm-180-veg-capsules/117115
+3위. [Osteo Bi-Flex (오스테오 바이플렉스)] Osteo Bi-Flex, 관절 건강, 3배 강력함 + 마그네슘, 코팅정 80개 | 가격: ₩40,332 | 평점: 4.8 | 리뷰수: 171 | URL: https://kr.iherb.com/pr/osteo-bi-flex-joint-health-triple-strength-magnesium-80-coated-tablets/89435
+4위. [Eidon Ionic Minerals (에이든 아이오닉 미네랄)] Eidon Ionic Minerals, 관절 지원, 액상 농축물, 60ml(2oz) | 가격: ₩17,254 | 평점: 4.7 | 리뷰수: 98 | URL: https://kr.iherb.com/pr/eidon-ionic-minerals-joint-support-liquid-concentrate-2-oz-60-ml/26009
+5위. [Nature's Craft (네이처스 크래프트)] Nature's Craft, MSM, 맥시멈 스트렝스, 1,000mg, 60정 | 가격: ₩10,357 | 평점: 4.7 | 리뷰수: 54 | URL: https://kr.iherb.com/pr/nature-s-craft-msm-maximum-strength-1-000-mg-60-tablets/133401
+
+[에너지 대사]
+1위. [Nutricost (뉴트리코스트)] Nutricost, 운동 능력, BCAA, 무맛, 360g(12.9oz) | 가격: ₩20,718 | 평점: 4.7 | 리뷰수: 579 | URL: https://kr.iherb.com/pr/nutricost-performance-bcaa-unflavored-12-9-oz-360-g/135521
+2위. [Nutricost (뉴트리코스트)] Nutricost, 운동 능력, BCAA, 무맛, 180g(6.3oz) | 가격: ₩14,119 | 평점: 4.7 | 리뷰수: 579 | URL: https://kr.iherb.com/pr/nutricost-performance-bcaa-unflavored-6-4-oz-180-g/131993
+3위. [Nutricost (뉴트리코스트)] Nutricost, 운동 능력, BCAA, 무맛, 360g(12.9oz) | 가격: ₩20,718 | 평점: 4.7 | 리뷰수: 579 | URL: https://kr.iherb.com/pr/nutricost-performance-bcaa-unflavored-12-9-oz-360-g/135521
+4위. [Nutricost (뉴트리코스트)] Nutricost, 운동 능력, BCAA, 무맛, 180g(6.3oz) | 가격: ₩14,119 | 평점: 4.7 | 리뷰수: 579 | URL: https://kr.iherb.com/pr/nutricost-performance-bcaa-unflavored-6-4-oz-180-g/131993
+5위. [Nutricost (뉴트리코스트)] Nutricost, 운동 능력, BCAA, 라즈베리 레모네이드, 330g(11.8oz) | 가격: ₩19,067 | 평점: 4.8 | 리뷰수: 406 | URL: https://kr.iherb.com/pr/nutricost-performance-bcaa-raspberry-lemonade-11-8-oz-330-g/135536
+
+[근육 발달]
+1위. [California Gold Nutrition (캘리포니아 골드 뉴트리션)] California Gold Nutrition, 세라펩타제, 단백질 분해 효소, 120,000SPU, 베지 캡슐 180정 | 가격: ₩56,915 | 평점: 4.7 | 리뷰수: 6585 | URL: https://kr.iherb.com/pr/california-gold-nutrition-serrapeptase-proteolytic-enzyme-120-000-spus-180-veggie-capsules/97395
+2위. [California Gold Nutrition (캘리포니아 골드 뉴트리션)] California Gold Nutrition, 세라펩타아제, 단백질 분해 효소, 40,000SPU, 베지 캡슐 180정 | 가격: ₩36,737 | 평점: 4.7 | 리뷰수: 5479 | URL: https://kr.iherb.com/pr/california-gold-nutrition-serrapeptase-proteolytic-enzyme-40-000-spus-180-veggie-capsules/97404
+3위. [California Gold Nutrition (캘리포니아 골드 뉴트리션)] California Gold Nutrition, 스포츠, 식물성 단백질, 유기농 현미 단백질 농축물, 아마씨, 치아씨, 계피 번 함유, 907g(2lb) | 가격: ₩54,833 | 평점: 4.4 | 리뷰수: 4505 | URL: https://kr.iherb.com/pr/california-gold-nutrition-sport-plant-based-protein-with-organic-brown-rice-protein-concentrate-flaxseed-chia-seed-cinnamon-bun-2-lb-907-g/89919
+4위. [Nutricost (뉴트리코스트)] Nutricost, 유청 단백질 농축물, 밀크 초콜릿, 907g(2lb) | 가격: ₩43,572 | 평점: 4.8 | 리뷰수: 400 | URL: https://kr.iherb.com/pr/nutricost-whey-protein-concentrate-milk-chocolate-2-lb-907-g/136875
+5위. [Vega (베가)] Vega, 프리미엄, Protein + Supergreens™, 크리미 초콜릿, 510g(1lb 2oz) | 가격: ₩34,802 | 평점: 4.5 | 리뷰수: 323 | URL: https://kr.iherb.com/pr/vega-premium-protein-supergreens-creamy-chocolate-1-lb-2-oz-510-g/152838
+
+[피로 개선 및 항산화]
+1위. [California Gold Nutrition (캘리포니아 골드 뉴트리션)] California Gold Nutrition, CoQ10, BioPerine® 흑후추추출물 함유, 베지 소프트젤 150정 | 가격: ₩31,671 | 평점: 4.8 | 리뷰수: 7012 | URL: https://kr.iherb.com/pr/california-gold-nutrition-coq10-with-bioperine-black-pepper-extract-150-veggie-softgels/99173
+2위. [NOW Foods (나우푸드)] NOW Foods, 액상 CoQ10, 오렌지, 118ml(4fl oz) | 가격: ₩16,777 | 평점: 4.7 | 리뷰수: 405 | URL: https://kr.iherb.com/pr/now-foods-liquid-coq10-orange-4-fl-oz-118-ml/7088
+3위. [Swanson Vitamins (스완슨 비타민)] Swanson Vitamins, 토코트리에놀 함유 CoQ10, 소프트젤 60정 | 가격: ₩20,034 | 평점: 4.8 | 리뷰수: 185 | URL: https://kr.iherb.com/pr/swanson-vitamins-coq10-with-tocotrienols-60-softgels/118123
+4위. [NaturesPlus (네이처스플러스)] NaturesPlus, Beyond CoQ10® 유비퀴놀, 50mg, 소프트젤 30정 | 가격: ₩15,054 | 평점: 4.8 | 리뷰수: 139 | URL: https://kr.iherb.com/pr/naturesplus-beyond-coq10-ubiquinol-50-mg-30-softgels/141587
+5위. [California Gold Nutrition (캘리포니아 골드 뉴트리션)] California Gold Nutrition, NMNH 복합체, CoQ10, PQQ, L-에르고티오네인 함유, 베지 캡슐 60정 | 가격: ₩86,601 | 평점: 4.6 | 리뷰수: 137 | URL: https://kr.iherb.com/pr/california-gold-nutrition-nmnh-complex-with-coq10-pqq-l-ergothioneine-60-veggie-capsules/146468
