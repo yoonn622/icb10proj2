@@ -7,3 +7,5 @@ scikit-learn==1.9.0
 python-dotenv==1.2.2
 beautifulsoup4==4.15.0
 curl-cffi==0.15.0
+folium>=0.16.0
+streamlit-folium>=0.20.0
