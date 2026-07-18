@@ -1,7 +1,6 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
-- [오류 수정] Streamlit Rerun 시 진단 추천 결과(st.session_state.recommendations) 상태 유지 및
-  '➕ 내 보관함에 담기' 클릭 시 보관함(st.session_state.cart)에 100% 즉시 담기도록 완전 해결.
+- [오류 수정] 보관함 및 추천/비교 카드의 엑박/유효하지 않은 이미지 URL 자동 감지 및 HTML onerror Fallback 100% 교체 로직 적용
 """
 
 import os
@@ -162,6 +161,16 @@ CUSTOM_CSS = """
         border: 1px solid #f3f4f6;
     }
 
+    .cart-thumb-img {
+        width: 85px;
+        height: 85px;
+        object-fit: contain;
+        border-radius: 10px;
+        background-color: #f9fafb;
+        padding: 0.3rem;
+        border: 1px solid #e5e7eb;
+    }
+
     .buy-btn {
         display: block;
         width: 100%;
@@ -204,9 +213,16 @@ if "filter_reasons" not in st.session_state:
 if "selected_goals" not in st.session_state:
     st.session_state.selected_goals = []
 
+def get_product_img(url):
+    url_str = str(url).strip() if pd.notna(url) else ""
+    if not url_str or url_str.lower() in ['nan', 'none', '0', 'undefined'] or not url_str.startswith('http'):
+        return DEFAULT_IMG
+    return url_str
+
 def add_to_cart(row):
     row_dict = dict(row) if hasattr(row, 'to_dict') else dict(row)
     pid = str(row_dict['product_id'])
+    row_dict['img_url'] = get_product_img(row_dict.get('img_url', ''))
     st.session_state.cart[pid] = row_dict
     st.toast(f"🛒 '{str(row_dict['product_name'])[:18]}...' 보관함에 추가되었습니다!", icon="✅")
 
@@ -220,11 +236,6 @@ def remove_from_cart(pid):
 def clear_cart():
     st.session_state.cart.clear()
     st.toast("🧹 보관함이 비워졌습니다.", icon="🧹")
-
-def get_product_img(url):
-    if pd.isna(url) or not str(url).startswith('http'):
-        return DEFAULT_IMG
-    return str(url)
 
 # ==========================================
 # 2. 데이터 로드 및 1일 섭취비용 산정
@@ -255,7 +266,7 @@ def load_data():
     df['matched_ingredient'] = df['matched_ingredient'].fillna('미분류 일반식품군')
     df['functionality_raw'] = df['functionality_raw'].fillna('일반 영양 공급')
     df['hard_filter_trigger'] = df['hard_filter_trigger'].fillna('None')
-    df['img_url'] = df['img_url'].fillna(DEFAULT_IMG)
+    df['img_url'] = df['img_url'].apply(get_product_img)
     
     df['popularity_score'] = df['review_count'] * df['rating']
     
@@ -339,7 +350,7 @@ def main():
             with mc1: st.metric("💰 담은 영양제 총 금액", f"{int(total_price):,}원")
             with mc2: st.metric("🗓️ 1일 총 합산 복용 비용", f"약 {int(total_daily):,}원 / 일")
             with mc3:
-                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_fix"):
+                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_v7"):
                     clear_cart()
                     st.rerun()
 
@@ -365,7 +376,7 @@ def main():
     ])
     
     # ==========================================
-    # [탭 1] 스마트 문진 및 AI 진단 (진단 결과 상태 유지)
+    # [탭 1] 스마트 문진 및 AI 진단
     # ==========================================
     with tab1:
         st.subheader("📋 개인 맞춤형 영양 문진 및 의료 안전 필터 진단")
@@ -391,18 +402,18 @@ def main():
             st.markdown("### 👤 STEP 1. 기본 정보 (Demographics)")
             c1, c2, c3 = st.columns([1.1, 1, 1.2])
             with c1:
-                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v6")
+                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v7")
                 male_concerns = []
                 female_status = "해당 없음"
                 if gender == "남성":
-                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v6")
+                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v7")
                 elif gender == "여성":
-                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v6")
+                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v7")
             with c2:
                 age_group = st.selectbox("1-2. 연령대", ["20대 미만", "20대", "30대", "40대", "50대 이상"], index=2)
             with c3:
-                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v6")
-                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v6")
+                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v7")
+                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v7")
                 
                 height_m = height / 100.0
                 bmi = weight / (height_m * height_m)
@@ -499,7 +510,6 @@ def main():
             st.markdown("<br/>", unsafe_allow_html=True)
             diagnose_click = st.button("🚀 AI 맞춤 영양제 진단 및 큐레이션 받기", type="primary", use_container_width=True)
             
-            # AI 진단 클릭 시 세션 상태에 계산결과 저장
             if diagnose_click:
                 df_filtered = df.copy()
                 filter_reasons = []
@@ -566,7 +576,9 @@ def main():
                     df_candidates = df_filtered[~df_filtered['product_id'].isin(used_product_ids)]
                     df_goal_top = df_candidates.sort_values(by='temp_goal_score', ascending=False).head(2 if len(health_goals) > 1 else 3)
                     for _, r in df_goal_top.iterrows():
-                        final_recommendations.append((goal, r.to_dict()))
+                        r_dict = r.to_dict()
+                        r_dict['img_url'] = get_product_img(r_dict.get('img_url', ''))
+                        final_recommendations.append((goal, r_dict))
                         used_product_ids.add(r['product_id'])
                         
                 st.session_state.diagnosed = True
@@ -575,7 +587,6 @@ def main():
                 st.session_state.selected_goals = health_goals
                 st.rerun()
 
-            # 🌟 세션 상태 기반 큐레이션 결과 렌더링 (Rerun 시에도 결과가 지속 유지됨)
             if st.session_state.diagnosed and st.session_state.recommendations:
                 st.markdown("---")
                 st.markdown("## 🔍 AI 추천 엔진 진단 및 고민별 맞춤 큐레이션 결과")
@@ -597,7 +608,7 @@ def main():
                         st.markdown(f"""
                         <div class="top-product-card">
                             <div>
-                                <img src="{img_src}" class="product-img-box" alt="제품 이미지"/>
+                                <img src="{img_src}" class="product-img-box" alt="제품 이미지" onerror="this.onerror=null; this.src='{DEFAULT_IMG}';"/>
                                 <span class="badge-goal">🎯 고민: {g_name}</span>
                                 <span class="badge-platform">{row['platform'].upper()}</span>
                                 <span class="badge-price">💰 1일 약 {int(row['daily_cost']):,}원</span>
@@ -615,11 +626,11 @@ def main():
                         """, unsafe_allow_html=True)
                         
                         if is_in_cart:
-                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v6"):
+                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v7"):
                                 remove_from_cart(pid)
                                 st.rerun()
                         else:
-                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v6", type="primary"):
+                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v7", type="primary"):
                                 add_to_cart(row)
                                 st.rerun()
 
@@ -645,7 +656,7 @@ def main():
         selected_cat_pill = None
         for i, (chip_label, target_cat) in enumerate(quick_chips):
             with pill_cols[i]:
-                if st.button(chip_label, key=f"chip_btn_{i}_v6", use_container_width=True):
+                if st.button(chip_label, key=f"chip_btn_{i}_v7", use_container_width=True):
                     selected_cat_pill = target_cat
 
         available_categories = [
@@ -663,7 +674,7 @@ def main():
         if selected_cat_pill and selected_cat_pill in available_categories:
             default_idx = available_categories.index(selected_cat_pill)
             
-        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v6")
+        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v7")
         
         df_cat = df.copy() if selected_cat == "전체 카테고리 보기" else df[df['matched_ingredient'] == selected_cat]
         df_cat_top10 = df_cat.sort_values(by='popularity_score', ascending=False).head(10)
@@ -693,7 +704,7 @@ def main():
     # ==========================================
     with tab3:
         st.subheader("🎂 연령대별 인기 영양제")
-        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v6")
+        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v7")
         age_weights = {
             "20대": ["비타민 B군·비오틴(에너지·활력)", "프로바이오틱스(유산균/장 건강)"],
             "30대": ["비타민 B군·비오틴(에너지·활력)", "rTG 오메가-3(혈관·혈행)", "마그네슘(신경·근육)"],
@@ -709,7 +720,7 @@ def main():
         st.dataframe(df_age_top10[['brand', 'product_name', 'matched_ingredient', 'price', 'daily_cost', 'platform']].reset_index(drop=True), use_container_width=True)
 
     # ==========================================
-    # [탭 4] 내 영양제 보관함 분석 (담긴 상품 리스트 관리)
+    # [탭 4] 내 영양제 보관함 분석 (HTML onerror Fallback 적용)
     # ==========================================
     with tab4:
         st.subheader("🛒 내 영양제 보관함 & 성분 중복 과다 섭취 분석")
@@ -740,14 +751,19 @@ def main():
             st.markdown("#### 📋 보관된 영양제 목록 관리")
             for _, r in cart_df.iterrows():
                 pid = str(r['product_id'])
-                img_src = get_product_img(r['img_url'])
-                cc1, cc2, cc3 = st.columns([1, 4, 1])
-                with cc1: st.image(img_src, width=90)
+                img_src = get_product_img(r.get('img_url', ''))
+                
+                cc1, cc2, cc3 = st.columns([1.2, 4, 1.2])
+                with cc1:
+                    # 💡 HTML 렌더링 + onerror Fallback으로 엑박 100% 교체 방지
+                    st.markdown(f"""
+                    <img src="{img_src}" class="cart-thumb-img" alt="상품 이미지" onerror="this.onerror=null; this.src='{DEFAULT_IMG}';"/>
+                    """, unsafe_allow_html=True)
                 with cc2:
-                    st.markdown(f"**{r['product_name']}** | {r['brand']}")
-                    st.caption(f"가격: {int(r['price']):,}원 (1일 약 {int(r['daily_cost']):,}원) | 주요 성분: {r['matched_ingredient']}")
+                    st.markdown(f"**{r['product_name']}** | <span style='color:#0369a1;'>{r['brand']}</span>", unsafe_allow_html=True)
+                    st.caption(f"가격: {int(r['price']):,}원 (1일 약 {int(r['daily_cost']):,}원) | 주요 성분: {r['matched_ingredient']} | 플랫폼: {str(r['platform']).upper()}")
                 with cc3:
-                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v6"):
+                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v7"):
                         remove_from_cart(pid)
                         st.rerun()
 
@@ -785,7 +801,7 @@ def main():
         st.subheader("🔍 전체 28,239개 영양제 다중 키워드 검색 & 1:1 스펙 비교")
         st.caption("공백 단위 멀티 키워드 검색 지원 (예: '종근당 비타민', '고려은단 C', '오쏘몰 7일분')")
         
-        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v6")
+        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v7")
         
         if search_query.strip():
             tokens = search_query.strip().split()
@@ -809,7 +825,7 @@ def main():
                 st.divider()
                 st.markdown("#### ⚖️ 검색 결과 중 최대 3개 제품 1:1 스펙 & 실물 이미지 비교")
                 product_options = search_df['product_name'].unique()[:40]
-                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v6")
+                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v7")
                 
                 if selected_products:
                     comp_df = search_df[search_df['product_name'].isin(selected_products)].drop_duplicates(subset=['product_name'])
@@ -824,7 +840,7 @@ def main():
                         with comp_cols[idx]:
                             st.markdown(f"""
                             <div class="custom-card" style="text-align:center;">
-                                <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
+                                <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지" onerror="this.onerror=null; this.src='{DEFAULT_IMG}';"/>
                                 <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#0e462d;">{row['product_name']}</h5>
                                 <p style="margin-bottom:0.3rem; font-size:0.9rem;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
                                 <p style="margin-bottom:0.3rem; color:#1b7a4e; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
@@ -837,11 +853,11 @@ def main():
                             """, unsafe_allow_html=True)
                             
                             if is_in_cart:
-                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v6"):
+                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v7"):
                                     remove_from_cart(pid)
                                     st.rerun()
                             else:
-                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v6", type="primary"):
+                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v7", type="primary"):
                                     add_to_cart(row)
                                     st.rerun()
 
