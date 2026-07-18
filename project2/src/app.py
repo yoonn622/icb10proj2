@@ -1,7 +1,7 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
-- [오류 완전 수정] iHerb 등 외부 핫링크 차단 이미지 URL을 Python 데이터 처리 단계에서
-  전용 고화질 영양제 썸네일(DEFAULT_IMG)로 100% 원천 교체하여 엑박 발생 전면 해결.
+- [가독성 개선] 다크모드/라이트모드 호환 BMI 수치 박스 및 전체 텍스트 명도/가독성 대폭 향상
+- [기능 추가] 내 영양제 보관함 목록 및 상단 바에 원클릭 바로 구매(쿠팡/올리브영/아이허브) 링크 연동
 """
 
 import os
@@ -15,7 +15,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ==========================================
-# 0. 페이지 기본 설정 및 커스텀 CSS (Clean Green & White)
+# 0. 페이지 기본 설정 및 커스텀 CSS (Clean Green & White + High Contrast)
 # ==========================================
 st.set_page_config(
     page_title="NutriFit | AI 초개인화 영양제 큐레이션",
@@ -43,12 +43,13 @@ CUSTOM_CSS = """
         font-weight: 800;
         font-size: 2.3rem;
         margin-bottom: 0.5rem;
-        color: #ffffff;
+        color: #ffffff !important;
         letter-spacing: -0.5px;
     }
     .header-container p {
         font-size: 1.1rem;
-        opacity: 0.92;
+        color: #f0fdf4 !important;
+        opacity: 0.95;
         margin: 0;
     }
     
@@ -67,7 +68,7 @@ CUSTOM_CSS = """
         font-weight: 700 !important;
         font-size: 1.02rem !important;
         border: 1px solid #d5e3dc;
-        color: #444444;
+        color: #374151 !important;
     }
     .stTabs [aria-selected="true"] {
         background-color: #1b7a4e !important;
@@ -77,7 +78,8 @@ CUSTOM_CSS = """
     }
 
     .custom-card {
-        background-color: #ffffff;
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
         border-radius: 14px;
         padding: 1.5rem;
         margin-bottom: 1.2rem;
@@ -85,9 +87,21 @@ CUSTOM_CSS = """
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
+    /* 🌟 BMI 박스 고대비 가독성 극대화 */
+    .bmi-box {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        border: 2px solid #1b7a4e !important;
+        border-left: 6px solid #1b7a4e !important;
+        padding: 1.2rem 1.4rem;
+        border-radius: 12px;
+        margin-top: 0.5rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+    
     .badge-green {
         background-color: #e8f5e9;
-        color: #1b7a4e;
+        color: #1b7a4e !important;
         padding: 0.35rem 0.85rem;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -98,7 +112,7 @@ CUSTOM_CSS = """
     }
     .badge-goal {
         background-color: #fef3c7;
-        color: #92400e;
+        color: #92400e !important;
         padding: 0.35rem 0.85rem;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -109,7 +123,7 @@ CUSTOM_CSS = """
     }
     .badge-platform {
         background-color: #e0f2fe;
-        color: #0369a1;
+        color: #0369a1 !important;
         padding: 0.35rem 0.85rem;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -120,7 +134,7 @@ CUSTOM_CSS = """
     }
     .badge-price {
         background-color: #f3e8ff;
-        color: #6b21a8;
+        color: #6b21a8 !important;
         padding: 0.35rem 0.85rem;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -130,16 +144,9 @@ CUSTOM_CSS = """
         margin-bottom: 0.3rem;
     }
     
-    .bmi-box {
-        background-color: #f0f7f4;
-        border-left: 5px solid #1b7a4e;
-        padding: 1.1rem 1.3rem;
-        border-radius: 10px;
-        margin-top: 0.4rem;
-    }
-    
     .top-product-card {
-        background: #ffffff;
+        background: #ffffff !important;
+        color: #1f2937 !important;
         border: 2px solid #1b7a4e;
         border-radius: 16px;
         padding: 1.2rem;
@@ -156,10 +163,10 @@ CUSTOM_CSS = """
         height: 170px;
         object-fit: contain;
         border-radius: 12px;
-        background-color: #f9fafb;
+        background-color: #ffffff;
         padding: 0.5rem;
         margin-bottom: 0.8rem;
-        border: 1px solid #f3f4f6;
+        border: 1px solid #e5e7eb;
     }
 
     .buy-btn {
@@ -167,17 +174,37 @@ CUSTOM_CSS = """
         width: 100%;
         text-align: center;
         background-color: #1b7a4e;
-        color: white !important;
+        color: #ffffff !important;
         font-weight: 700;
         padding: 0.65rem 1rem;
         border-radius: 10px;
         text-decoration: none;
-        margin-top: 0.6rem;
+        margin-top: 0.4rem;
+        margin-bottom: 0.4rem;
         transition: background-color 0.2s ease;
     }
     .buy-btn:hover {
         background-color: #0e462d;
-        color: white !important;
+        color: #ffffff !important;
+        text-decoration: none;
+    }
+    
+    .cart-buy-btn {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        background-color: #0284c7;
+        color: #ffffff !important;
+        font-weight: 700;
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.88rem;
+        transition: background-color 0.2s ease;
+    }
+    .cart-buy-btn:hover {
+        background-color: #0369a1;
+        color: #ffffff !important;
         text-decoration: none;
     }
 </style>
@@ -187,7 +214,7 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 DEFAULT_IMG = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80"
 
 # ==========================================
-# 1. 세션 스테이트 & 엑박 검증 헬퍼 (보관함 Cart & 진단 결과 상태 유지)
+# 1. 세션 스테이트 & 헬퍼
 # ==========================================
 if "cart" not in st.session_state:
     st.session_state.cart = {}
@@ -205,10 +232,6 @@ if "selected_goals" not in st.session_state:
     st.session_state.selected_goals = []
 
 def get_product_img(url, platform=''):
-    """
-    iHerb 도메인 등 외부 핫링크가 차단된 이미지 URL을 사전 검지하여
-    100% 정상 로드되는 고화질 영양제 썸네일로 교체하는 헬퍼 함수
-    """
     url_str = str(url).strip() if pd.notna(url) else ""
     plat_str = str(platform).lower()
     
@@ -237,6 +260,18 @@ def remove_from_cart(pid):
 def clear_cart():
     st.session_state.cart.clear()
     st.toast("🧹 보관함이 비워졌습니다.", icon="🧹")
+
+def get_purchase_url(platform, product_name):
+    encoded_name = quote_plus(str(product_name))
+    plat_str = str(platform).lower()
+    if 'coupang' in plat_str:
+        return f"https://www.coupang.com/np/search?q={encoded_name}"
+    elif 'oliveyoung' in plat_str:
+        return f"https://www.oliveyoung.co.kr/store/search/getSearchMain.do?query={encoded_name}"
+    elif 'iherb' in plat_str:
+        return f"https://kr.iherb.com/search?kw={encoded_name}"
+    else:
+        return f"https://search.shopping.naver.com/search/all?query={encoded_name}"
 
 # ==========================================
 # 2. 데이터 로드 및 1일 섭취비용 산정
@@ -269,9 +304,7 @@ def load_data():
     df['hard_filter_trigger'] = df['hard_filter_trigger'].fillna('None')
     df['platform'] = df['platform'].fillna('unknown')
     
-    # 🌟 데이터 로드 시점부터 iherb 등 엑박 위험 이미지를 미리 원천 교체
     df['img_url'] = df.apply(lambda r: get_product_img(r.get('img_url', ''), r.get('platform', '')), axis=1)
-    
     df['popularity_score'] = df['review_count'] * df['rating']
     
     def extract_form(row):
@@ -312,19 +345,6 @@ def load_data():
     return df
 
 
-def get_purchase_url(platform, product_name):
-    encoded_name = quote_plus(product_name)
-    plat_str = str(platform).lower()
-    if 'coupang' in plat_str:
-        return f"https://www.coupang.com/np/search?q={encoded_name}"
-    elif 'oliveyoung' in plat_str:
-        return f"https://www.oliveyoung.co.kr/store/search/getSearchMain.do?query={encoded_name}"
-    elif 'iherb' in plat_str:
-        return f"https://kr.iherb.com/search?kw={encoded_name}"
-    else:
-        return f"https://search.shopping.naver.com/search/all?query={encoded_name}"
-
-
 # ==========================================
 # 3. 메인 대시보드 레이아웃
 # ==========================================
@@ -340,10 +360,10 @@ def main():
     if df.empty:
         return
 
-    # 🛒 상단 스마트 보관함 요약 바 (Cart Summary)
+    # 🛒 상단 스마트 보관함 요약 바 (Cart Summary + 바로 구매 링크 연동)
     cart_count = len(st.session_state.cart)
     if cart_count > 0:
-        with st.expander(f"🛒 내 영양제 보관함 ({cart_count}개 담김) - 클릭하여 합산 비용 및 중복 성분 진단 보기", expanded=True):
+        with st.expander(f"🛒 내 영양제 보관함 ({cart_count}개 담김) - 클릭하여 합산 비용 및 구매 링크 보기", expanded=True):
             cart_rows = list(st.session_state.cart.values())
             cart_df = pd.DataFrame(cart_rows)
             
@@ -354,7 +374,7 @@ def main():
             with mc1: st.metric("💰 담은 영양제 총 금액", f"{int(total_price):,}원")
             with mc2: st.metric("🗓️ 1일 총 합산 복용 비용", f"약 {int(total_daily):,}원 / 일")
             with mc3:
-                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_v8_src"):
+                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_v9_src"):
                     clear_cart()
                     st.rerun()
 
@@ -368,7 +388,17 @@ def main():
             else:
                 st.success("✅ 현재 담으신 영양제들의 주요 기능성 원료 중복 및 과다 섭취 위험이 없습니다!")
 
-            st.dataframe(cart_df[['brand', 'product_name', 'price', 'daily_cost', 'matched_ingredient', 'platform']].reset_index(drop=True), use_container_width=True)
+            display_cart_df = cart_df.copy()
+            display_cart_df['구매_링크'] = display_cart_df.apply(lambda r: get_purchase_url(r['platform'], r['product_name']), axis=1)
+            
+            st.markdown("##### 🛒 담은 영양제 목록 및 구매 링크")
+            st.dataframe(
+                display_cart_df[['brand', 'product_name', 'price', 'daily_cost', 'matched_ingredient', 'platform', '구매_링크']].reset_index(drop=True),
+                column_config={
+                    "구매_링크": st.column_config.LinkColumn("🛒 구매 링크", help="클릭 시 구매 페이지로 이동", display_text="구매하러 가기")
+                },
+                use_container_width=True
+            )
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "🧬 뉴트리핏 스마트 문진 및 AI 진단",
@@ -380,7 +410,7 @@ def main():
     ])
     
     # ==========================================
-    # [탭 1] 스마트 문진 및 AI 진단
+    # [탭 1] 스마트 문진 및 AI 진단 (BMI 고대비 가독성 개선)
     # ==========================================
     with tab1:
         st.subheader("📋 개인 맞춤형 영양 문진 및 의료 안전 필터 진단")
@@ -406,18 +436,18 @@ def main():
             st.markdown("### 👤 STEP 1. 기본 정보 (Demographics)")
             c1, c2, c3 = st.columns([1.1, 1, 1.2])
             with c1:
-                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v8_src")
+                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v9_src")
                 male_concerns = []
                 female_status = "해당 없음"
                 if gender == "남성":
-                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v8_src")
+                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v9_src")
                 elif gender == "여성":
-                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v8_src")
+                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v9_src")
             with c2:
                 age_group = st.selectbox("1-2. 연령대", ["20대 미만", "20대", "30대", "40대", "50대 이상"], index=2)
             with c3:
-                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v8_src")
-                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v8_src")
+                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v9_src")
+                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v9_src")
                 
                 height_m = height / 100.0
                 bmi = weight / (height_m * height_m)
@@ -428,8 +458,14 @@ def main():
                 
                 st.markdown(f"""
                 <div class="bmi-box">
-                    <b>📐 실시간 계산 BMI 지수:</b> {bmi:.1f} kg/m²<br/>
-                    <b>📊 상태 진단:</b> <span style="color:{bmi_color}; font-weight:700;">{bmi_status}</span>
+                    <div style="margin-bottom:0.3rem;">
+                        <span style="color:#111827; font-size:1.05rem; font-weight:800;">📐 실시간 계산 BMI 지수:</span> 
+                        <span style="color:#0e462d; font-size:1.2rem; font-weight:800; background-color:#e8f5e9; padding:0.1rem 0.5rem; border-radius:6px;">{bmi:.1f} kg/m²</span>
+                    </div>
+                    <div>
+                        <span style="color:#111827; font-size:1.05rem; font-weight:800;">📊 상태 진단:</span> 
+                        <span style="color:{bmi_color}; font-size:1.2rem; font-weight:800; background-color:#f9fafb; padding:0.1rem 0.5rem; border-radius:6px; border:1px solid #e5e7eb;">{bmi_status}</span>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -617,9 +653,9 @@ def main():
                                 <span class="badge-platform">{row['platform'].upper()}</span>
                                 <span class="badge-price">💰 1일 약 {int(row['daily_cost']):,}원</span>
                                 <h4 style="margin-top:0.5rem; color:#0e462d; font-size:1.05rem; min-height: 2.6rem;">{row['product_name']}</h4>
-                                <p style="margin-bottom:0.2rem; color:#555; font-size:0.9rem;"><b>브랜드:</b> {row['brand']}</p>
+                                <p style="margin-bottom:0.2rem; color:#444; font-size:0.9rem;"><b>브랜드:</b> {row['brand']}</p>
                                 <p style="margin-bottom:0.2rem; color:#1b7a4e; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
-                                <p style="margin-bottom:0.4rem; color:#444; font-size:0.85rem;"><b>⭐ 평점:</b> {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
+                                <p style="margin-bottom:0.4rem; color:#333; font-size:0.85rem;"><b>⭐ 평점:</b> {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
                                 <hr style="margin:0.5rem 0; border-color:#e1e9e5;"/>
                                 <p style="font-size:0.85rem; color:#333;"><b>🧪 주요 원료:</b><br/>{row['matched_ingredient']}</p>
                             </div>
@@ -630,11 +666,11 @@ def main():
                         """, unsafe_allow_html=True)
                         
                         if is_in_cart:
-                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v8_src"):
+                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v9_src"):
                                 remove_from_cart(pid)
                                 st.rerun()
                         else:
-                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v8_src", type="primary"):
+                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v9_src", type="primary"):
                                 add_to_cart(row)
                                 st.rerun()
 
@@ -660,7 +696,7 @@ def main():
         selected_cat_pill = None
         for i, (chip_label, target_cat) in enumerate(quick_chips):
             with pill_cols[i]:
-                if st.button(chip_label, key=f"chip_btn_{i}_v8_src", use_container_width=True):
+                if st.button(chip_label, key=f"chip_btn_{i}_v9_src", use_container_width=True):
                     selected_cat_pill = target_cat
 
         available_categories = [
@@ -678,7 +714,7 @@ def main():
         if selected_cat_pill and selected_cat_pill in available_categories:
             default_idx = available_categories.index(selected_cat_pill)
             
-        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v8_src")
+        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v9_src")
         
         df_cat = df.copy() if selected_cat == "전체 카테고리 보기" else df[df['matched_ingredient'] == selected_cat]
         df_cat_top10 = df_cat.sort_values(by='popularity_score', ascending=False).head(10)
@@ -708,7 +744,7 @@ def main():
     # ==========================================
     with tab3:
         st.subheader("🎂 연령대별 인기 영양제")
-        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v8_src")
+        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v9_src")
         age_weights = {
             "20대": ["비타민 B군·비오틴(에너지·활력)", "프로바이오틱스(유산균/장 건강)"],
             "30대": ["비타민 B군·비오틴(에너지·활력)", "rTG 오메가-3(혈관·혈행)", "마그네슘(신경·근육)"],
@@ -724,7 +760,7 @@ def main():
         st.dataframe(df_age_top10[['brand', 'product_name', 'matched_ingredient', 'price', 'daily_cost', 'platform']].reset_index(drop=True), use_container_width=True)
 
     # ==========================================
-    # [탭 4] 내 영양제 보관함 분석 (st.image 기반 이미지 100% 정상 노출)
+    # [탭 4] 내 영양제 보관함 분석 (원클릭 바로 구매 링크 100% 연동)
     # ==========================================
     with tab4:
         st.subheader("🛒 내 영양제 보관함 & 성분 중복 과다 섭취 분석")
@@ -752,19 +788,27 @@ def main():
                 st.success("✅ 담으신 상품들 간의 성분 중복 및 과다 섭취 위험 요소가 없습니다.")
 
             st.divider()
-            st.markdown("#### 📋 보관된 영양제 목록 관리")
+            st.markdown("#### 📋 보관된 영양제 목록 관리 & 원클릭 구매 연동")
             for _, r in cart_df.iterrows():
                 pid = str(r['product_id'])
                 img_src = get_product_img(r.get('img_url', ''), r.get('platform', ''))
+                p_url = get_purchase_url(r.get('platform', ''), r.get('product_name', ''))
+                plat_name = str(r.get('platform', 'SHOP')).upper()
                 
-                cc1, cc2, cc3 = st.columns([1, 4, 1.2])
+                cc1, cc2, cc3 = st.columns([1, 4, 1.4])
                 with cc1:
                     st.image(img_src, width=85)
                 with cc2:
-                    st.markdown(f"**{r['product_name']}** | <span style='color:#0369a1;'>{r['brand']}</span>", unsafe_allow_html=True)
-                    st.caption(f"가격: {int(r['price']):,}원 (1일 약 {int(r['daily_cost']):,}원) | 주요 성분: {r['matched_ingredient']} | 플랫폼: {str(r['platform']).upper()}")
+                    st.markdown(f"**{r['product_name']}** | <span style='color:#0369a1; font-weight:700;'>{r['brand']}</span>", unsafe_allow_html=True)
+                    st.caption(f"가격: {int(r['price']):,}원 (1일 약 {int(r['daily_cost']):,}원) | 주요 성분: {r['matched_ingredient']} | 판매처: {plat_name}")
                 with cc3:
-                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v8_src"):
+                    st.markdown(f"""
+                    <a href="{p_url}" target="_blank" class="cart-buy-btn">🛒 {plat_name} 구매</a>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
+                    
+                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v9_src", use_container_width=True):
                         remove_from_cart(pid)
                         st.rerun()
 
@@ -779,11 +823,11 @@ def main():
             st.markdown("""
             <div class="custom-card" style="border-left: 5px solid #16a34a;">
                 <h5 style="color:#16a34a; margin-bottom:0.3rem;">1. 오메가3 + 비타민 E / 루테인</h5>
-                <p style="font-size:0.95rem;">지용성 영양제인 루테인은 오메가3의 불포화지방산과 함께 섭취 시 체내 흡수율이 대폭 증가하며, 비타민E는 오메가3의 산화를 막아줍니다.</p>
+                <p style="font-size:0.95rem; color:#374151;">지용성 영양제인 루테인은 오메가3의 불포화지방산과 함께 섭취 시 체내 흡수율이 대폭 증가하며, 비타민E는 오메가3의 산화를 막아줍니다.</p>
             </div>
             <div class="custom-card" style="border-left: 5px solid #16a34a;">
                 <h5 style="color:#16a34a; margin-bottom:0.3rem;">2. 칼슘 + 비타민 D + 마그네슘 (칼마디)</h5>
-                <p style="font-size:0.95rem;">비타민D가 장에서 칼슘의 흡수를 돕고, 마그네슘은 흡수된 칼슘이 뼈로 잘 이동하도록 촉진하는 대표 상호보완 조합입니다.</p>
+                <p style="font-size:0.95rem; color:#374151;">비타민D가 장에서 칼슘의 흡수를 돕고, 마그네슘은 흡수된 칼슘이 뼈로 잘 이동하도록 촉진하는 대표 상호보완 조합입니다.</p>
             </div>
             """, unsafe_allow_html=True)
         with g2:
@@ -791,7 +835,7 @@ def main():
             st.markdown("""
             <div class="custom-card" style="border-left: 5px solid #dc2626;">
                 <h5 style="color:#dc2626; margin-bottom:0.3rem;">1. 칼슘 vs 철분</h5>
-                <p style="font-size:0.95rem;">두 성분은 체내 이동 통로(흡수 수용체)를 공유하므로 동시 복용 시 서로의 흡수를 섭취 방해합니다. (최소 2시간 차이 권장)</p>
+                <p style="font-size:0.95rem; color:#374151;">두 성분은 체내 이동 통로(흡수 수용체)를 공유하므로 동시 복용 시 서로의 흡수를 섭취 방해합니다. (최소 2시간 차이 권장)</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -802,7 +846,7 @@ def main():
         st.subheader("🔍 전체 28,239개 영양제 다중 키워드 검색 & 1:1 스펙 비교")
         st.caption("공백 단위 멀티 키워드 검색 지원 (예: '종근당 비타민', '고려은단 C', '오쏘몰 7일분')")
         
-        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v8_src")
+        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v9_src")
         
         if search_query.strip():
             tokens = search_query.strip().split()
@@ -826,7 +870,7 @@ def main():
                 st.divider()
                 st.markdown("#### ⚖️ 검색 결과 중 최대 3개 제품 1:1 스펙 & 실물 이미지 비교")
                 product_options = search_df['product_name'].unique()[:40]
-                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v8_src")
+                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v9_src")
                 
                 if selected_products:
                     comp_df = search_df[search_df['product_name'].isin(selected_products)].drop_duplicates(subset=['product_name'])
@@ -843,22 +887,22 @@ def main():
                             <div class="custom-card" style="text-align:center;">
                                 <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
                                 <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#0e462d;">{row['product_name']}</h5>
-                                <p style="margin-bottom:0.3rem; font-size:0.9rem;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
+                                <p style="margin-bottom:0.3rem; font-size:0.9rem; color:#444;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
                                 <p style="margin-bottom:0.3rem; color:#1b7a4e; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
                                 <p style="margin-bottom:0.3rem; color:#6b21a8; font-size:0.95rem;"><b>💰 1일 섭취비용:</b> 약 {int(row['daily_cost']):,}원/일</p>
-                                <p style="margin-bottom:0.3rem;"><b>평점:</b> ⭐ {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
-                                <p style="margin-bottom:0.3rem;"><b>주요 성분:</b> {row['matched_ingredient']}</p>
-                                <p style="margin-bottom:0.5rem;"><b>제형:</b> {row['form_type']}</p>
+                                <p style="margin-bottom:0.3rem; color:#333;"><b>평점:</b> ⭐ {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
+                                <p style="margin-bottom:0.3rem; color:#333;"><b>주요 성분:</b> {row['matched_ingredient']}</p>
+                                <p style="margin-bottom:0.5rem; color:#333;"><b>제형:</b> {row['form_type']}</p>
                                 <a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
                             </div>
                             """, unsafe_allow_html=True)
                             
                             if is_in_cart:
-                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v8_src"):
+                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v9_src"):
                                     remove_from_cart(pid)
                                     st.rerun()
                             else:
-                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v8_src", type="primary"):
+                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v9_src", type="primary"):
                                     add_to_cart(row)
                                     st.rerun()
 
