@@ -1,5 +1,6 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
+- [기능 추가] 약관 동의 영역 '☑️ 전체 동의' 체크박스 기능 구현 및 개별 약관 체크 상태 실시간 상호 동기화
 - [가독성 개선] 다크모드/라이트모드 호환 BMI 수치 박스 및 전체 텍스트 명도/가독성 대폭 향상
 - [기능 추가] 내 영양제 보관함 목록 및 상단 바에 원클릭 바로 구매(쿠팡/올리브영/아이허브) 링크 연동
 """
@@ -87,7 +88,6 @@ CUSTOM_CSS = """
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
-    /* 🌟 BMI 박스 고대비 가독성 극대화 */
     .bmi-box {
         background-color: #ffffff !important;
         color: #111827 !important;
@@ -214,7 +214,7 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 DEFAULT_IMG = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80"
 
 # ==========================================
-# 1. 세션 스테이트 & 헬퍼
+# 1. 세션 스테이트 & 약관 전체 동의 콜백
 # ==========================================
 if "cart" not in st.session_state:
     st.session_state.cart = {}
@@ -230,6 +230,29 @@ if "filter_reasons" not in st.session_state:
 
 if "selected_goals" not in st.session_state:
     st.session_state.selected_goals = []
+
+# 🔒 약관 동의 세션 스테이트 초기화
+if "agree_all" not in st.session_state:
+    st.session_state.agree_all = False
+if "agree_terms" not in st.session_state:
+    st.session_state.agree_terms = False
+if "agree_age" not in st.session_state:
+    st.session_state.agree_age = False
+if "agree_health" not in st.session_state:
+    st.session_state.agree_health = False
+
+def on_change_agree_all():
+    val = st.session_state.agree_all
+    st.session_state.agree_terms = val
+    st.session_state.agree_age = val
+    st.session_state.agree_health = val
+
+def on_change_individual_agree():
+    st.session_state.agree_all = (
+        st.session_state.agree_terms and 
+        st.session_state.agree_age and 
+        st.session_state.agree_health
+    )
 
 def get_product_img(url, platform=''):
     url_str = str(url).strip() if pd.notna(url) else ""
@@ -360,7 +383,7 @@ def main():
     if df.empty:
         return
 
-    # 🛒 상단 스마트 보관함 요약 바 (Cart Summary + 바로 구매 링크 연동)
+    # 🛒 상단 스마트 보관함 요약 바 (Cart Summary)
     cart_count = len(st.session_state.cart)
     if cart_count > 0:
         with st.expander(f"🛒 내 영양제 보관함 ({cart_count}개 담김) - 클릭하여 합산 비용 및 구매 링크 보기", expanded=True):
@@ -374,7 +397,7 @@ def main():
             with mc1: st.metric("💰 담은 영양제 총 금액", f"{int(total_price):,}원")
             with mc2: st.metric("🗓️ 1일 총 합산 복용 비용", f"약 {int(total_daily):,}원 / 일")
             with mc3:
-                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_v9_src"):
+                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_v10_src"):
                     clear_cart()
                     st.rerun()
 
@@ -410,7 +433,7 @@ def main():
     ])
     
     # ==========================================
-    # [탭 1] 스마트 문진 및 AI 진단 (BMI 고대비 가독성 개선)
+    # [탭 1] 스마트 문진 및 AI 진단 (전체 동의 체크박스 추가)
     # ==========================================
     with tab1:
         st.subheader("📋 개인 맞춤형 영양 문진 및 의료 안전 필터 진단")
@@ -420,34 +443,57 @@ def main():
             "특이 체질이나 지병이 있으신 경우 전문의 또는 약사와 상담을 권장합니다."
         )
         
-        st.markdown("##### 🔒 필수 약관 동의")
+        st.markdown("##### 🔒 약관 동의 및 수집 안내")
+        
+        # 🌟 '☑️ 전체 동의' 원클릭 체크박스 추가
+        st.checkbox(
+            "☑️ **[전체 동의]** 서비스 이용약관, 연령 확인 및 개인정보/민감정보 수집·이용에 모두 동의합니다.",
+            key="agree_all",
+            on_change=on_change_agree_all
+        )
+        
         agree_cols = st.columns(3)
-        with agree_cols[0]: agree_terms = st.checkbox("[필수] 서비스 이용약관 및 일반 개인정보 수집·이용 동의")
-        with agree_cols[1]: agree_age = st.checkbox("[필수] 만 14세 이상 이용 확인 (만 14세 미만 제한)")
-        with agree_cols[2]: agree_health = st.checkbox("[필수] 건강 상태 및 라이프스타일(민감정보) 수집·이용 동의")
+        with agree_cols[0]:
+            st.checkbox(
+                "[필수] 서비스 이용약관 및 일반 개인정보 수집·이용 동의",
+                key="agree_terms",
+                on_change=on_change_individual_agree
+            )
+        with agree_cols[1]:
+            st.checkbox(
+                "[필수] 만 14세 이상 이용 확인 (만 14세 미만 제한)",
+                key="agree_age",
+                on_change=on_change_individual_agree
+            )
+        with agree_cols[2]:
+            st.checkbox(
+                "[필수] 건강 상태 및 라이프스타일(민감정보) 수집·이용 동의",
+                key="agree_health",
+                on_change=on_change_individual_agree
+            )
             
-        all_agreed = agree_terms and agree_age and agree_health
+        all_agreed = st.session_state.agree_terms and st.session_state.agree_age and st.session_state.agree_health
         st.divider()
         
         if not all_agreed:
-            st.info("💡 위 3가지 필수 이용 약관 항목에 모두 동의해주셔야 스마트 문진 및 진단이 활성화됩니다.")
+            st.info("💡 위 필수 이용 약관 항목에 모두 동의(또는 '[전체 동의]' 선택)해주셔야 스마트 문진 및 진단이 활성화됩니다.")
         else:
             # STEP 1
             st.markdown("### 👤 STEP 1. 기본 정보 (Demographics)")
             c1, c2, c3 = st.columns([1.1, 1, 1.2])
             with c1:
-                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v9_src")
+                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v10_src")
                 male_concerns = []
                 female_status = "해당 없음"
                 if gender == "남성":
-                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v9_src")
+                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v10_src")
                 elif gender == "여성":
-                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v9_src")
+                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v10_src")
             with c2:
                 age_group = st.selectbox("1-2. 연령대", ["20대 미만", "20대", "30대", "40대", "50대 이상"], index=2)
             with c3:
-                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v9_src")
-                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v9_src")
+                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v10_src")
+                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v10_src")
                 
                 height_m = height / 100.0
                 bmi = weight / (height_m * height_m)
@@ -666,11 +712,11 @@ def main():
                         """, unsafe_allow_html=True)
                         
                         if is_in_cart:
-                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v9_src"):
+                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v10_src"):
                                 remove_from_cart(pid)
                                 st.rerun()
                         else:
-                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v9_src", type="primary"):
+                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v10_src", type="primary"):
                                 add_to_cart(row)
                                 st.rerun()
 
@@ -696,7 +742,7 @@ def main():
         selected_cat_pill = None
         for i, (chip_label, target_cat) in enumerate(quick_chips):
             with pill_cols[i]:
-                if st.button(chip_label, key=f"chip_btn_{i}_v9_src", use_container_width=True):
+                if st.button(chip_label, key=f"chip_btn_{i}_v10_src", use_container_width=True):
                     selected_cat_pill = target_cat
 
         available_categories = [
@@ -714,7 +760,7 @@ def main():
         if selected_cat_pill and selected_cat_pill in available_categories:
             default_idx = available_categories.index(selected_cat_pill)
             
-        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v9_src")
+        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v10_src")
         
         df_cat = df.copy() if selected_cat == "전체 카테고리 보기" else df[df['matched_ingredient'] == selected_cat]
         df_cat_top10 = df_cat.sort_values(by='popularity_score', ascending=False).head(10)
@@ -744,7 +790,7 @@ def main():
     # ==========================================
     with tab3:
         st.subheader("🎂 연령대별 인기 영양제")
-        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v9_src")
+        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v10_src")
         age_weights = {
             "20대": ["비타민 B군·비오틴(에너지·활력)", "프로바이오틱스(유산균/장 건강)"],
             "30대": ["비타민 B군·비오틴(에너지·활력)", "rTG 오메가-3(혈관·혈행)", "마그네슘(신경·근육)"],
@@ -760,7 +806,7 @@ def main():
         st.dataframe(df_age_top10[['brand', 'product_name', 'matched_ingredient', 'price', 'daily_cost', 'platform']].reset_index(drop=True), use_container_width=True)
 
     # ==========================================
-    # [탭 4] 내 영양제 보관함 분석 (원클릭 바로 구매 링크 100% 연동)
+    # [탭 4] 내 영양제 보관함 분석
     # ==========================================
     with tab4:
         st.subheader("🛒 내 영양제 보관함 & 성분 중복 과다 섭취 분석")
@@ -808,7 +854,7 @@ def main():
                     
                     st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
                     
-                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v9_src", use_container_width=True):
+                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v10_src", use_container_width=True):
                         remove_from_cart(pid)
                         st.rerun()
 
@@ -846,7 +892,7 @@ def main():
         st.subheader("🔍 전체 28,239개 영양제 다중 키워드 검색 & 1:1 스펙 비교")
         st.caption("공백 단위 멀티 키워드 검색 지원 (예: '종근당 비타민', '고려은단 C', '오쏘몰 7일분')")
         
-        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v9_src")
+        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v10_src")
         
         if search_query.strip():
             tokens = search_query.strip().split()
@@ -870,7 +916,7 @@ def main():
                 st.divider()
                 st.markdown("#### ⚖️ 검색 결과 중 최대 3개 제품 1:1 스펙 & 실물 이미지 비교")
                 product_options = search_df['product_name'].unique()[:40]
-                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v9_src")
+                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v10_src")
                 
                 if selected_products:
                     comp_df = search_df[search_df['product_name'].isin(selected_products)].drop_duplicates(subset=['product_name'])
@@ -898,11 +944,11 @@ def main():
                             """, unsafe_allow_html=True)
                             
                             if is_in_cart:
-                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v9_src"):
+                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v10_src"):
                                     remove_from_cart(pid)
                                     st.rerun()
                             else:
-                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v9_src", type="primary"):
+                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v10_src", type="primary"):
                                     add_to_cart(row)
                                     st.rerun()
 
