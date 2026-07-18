@@ -1,9 +1,8 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
-[타사 벤치마킹 고도화]
-1. 🛒 Session State 기반 스마트 영양제 보관함 & 성분 중복 과다섭취 경고 체크
-2. 🏷️ 원클릭 원료/목적 퀵 알약 필터 칩 (Quick Pill Chips)
-3. 💰 1일 섭취비용(원/일) 계산 및 가성비 뱃지 시스템
+- [복구 1] STEP 1~5 전체 스마트 문진 문항 (STEP 2 라이프스타일, STEP 3 안전성 필터 완벽 복구)
+- [복구 2] [탭 6] 영양제 1:1 3개 제품 스펙 & 실물 이미지 비교 영역 완벽 복구
+- [기능 3] 보관함 담기, 1일 섭취비용 계산, 20종+ 퀵 알약 칩, 성분 중복 과다 섭취 분석 통합 제공
 """
 
 import os
@@ -17,7 +16,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ==========================================
-# 0. 페이지 기본 설정 및 커스텀 CSS (Clean Green & White + Gold Accent)
+# 0. 페이지 기본 설정 및 커스텀 CSS (Clean Green & White)
 # ==========================================
 st.set_page_config(
     page_title="NutriFit | AI 초개인화 영양제 큐레이션",
@@ -182,14 +181,6 @@ CUSTOM_CSS = """
         color: white !important;
         text-decoration: none;
     }
-    
-    .cart-box {
-        background-color: #ffffff;
-        border: 2px dashed #1b7a4e;
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
@@ -336,11 +327,10 @@ def main():
             with mc1: st.metric("💰 담은 영양제 총 금액", f"{int(total_price):,}원")
             with mc2: st.metric("🗓️ 1일 총 합산 복용 비용", f"약 {int(total_daily):,}원 / 일")
             with mc3:
-                if st.button("🧹 보관함 전체 비우기", type="secondary"):
+                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_src"):
                     clear_cart()
                     st.rerun()
 
-            # 🚨 영양 성분 중복 과다 섭취 주의 경고 분석
             ing_counts = cart_df['matched_ingredient'].value_counts()
             duplicated_ings = ing_counts[ing_counts > 1]
             if not duplicated_ings.empty:
@@ -363,20 +353,21 @@ def main():
     ])
     
     # ==========================================
-    # [탭 1] 스마트 문진 및 AI 진단
+    # [탭 1] 스마트 문진 및 AI 진단 (STEP 1~5 전체 복구)
     # ==========================================
     with tab1:
         st.subheader("📋 개인 맞춤형 영양 문진 및 의료 안전 필터 진단")
         st.warning(
             "⚠️ **서비스 안내 및 면책 공지**: 본 서비스는 의학적 치료나 질병 진단을 대체하는 의료 행위가 아니며, "
-            "식약처 공공데이터 및 이커머스 상품 정보를 바탕으로 제공되는 헬스케어 참고용 추천 시스템입니다."
+            "식약처 공공데이터 및 이커머스 상품 정보를 바탕으로 제공되는 헬스케어 참고용 추천 시스템입니다. "
+            "특이 체질이나 지병이 있으신 경우 전문의 또는 약사와 상담을 권장합니다."
         )
         
         st.markdown("##### 🔒 필수 약관 동의")
         agree_cols = st.columns(3)
-        with agree_cols[0]: agree_terms = st.checkbox("[필수] 서비스 이용약관 동의")
-        with agree_cols[1]: agree_age = st.checkbox("[필수] 만 14세 이상 확인")
-        with agree_cols[2]: agree_health = st.checkbox("[필수] 민감정보 수집 동의")
+        with agree_cols[0]: agree_terms = st.checkbox("[필수] 서비스 이용약관 및 일반 개인정보 수집·이용 동의")
+        with agree_cols[1]: agree_age = st.checkbox("[필수] 만 14세 이상 이용 확인 (만 14세 미만 제한)")
+        with agree_cols[2]: agree_health = st.checkbox("[필수] 건강 상태 및 라이프스타일(민감정보) 수집·이용 동의")
             
         all_agreed = agree_terms and agree_age and agree_health
         st.divider()
@@ -384,29 +375,78 @@ def main():
         if not all_agreed:
             st.info("💡 위 3가지 필수 이용 약관 항목에 모두 동의해주셔야 스마트 문진 및 진단이 활성화됩니다.")
         else:
+            # STEP 1
             st.markdown("### 👤 STEP 1. 기본 정보 (Demographics)")
             c1, c2, c3 = st.columns([1.1, 1, 1.2])
             with c1:
-                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="g_v4_src")
+                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v5_src")
                 male_concerns = []
                 female_status = "해당 없음"
                 if gender == "남성":
-                    male_concerns = st.multiselect("남성 특화 추가 고민", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="m_v4_src")
+                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v5_src")
                 elif gender == "여성":
-                    female_status = st.radio("여성 생애주기/상태", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="f_v4_src")
+                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v5_src")
             with c2:
                 age_group = st.selectbox("1-2. 연령대", ["20대 미만", "20대", "30대", "40대", "50대 이상"], index=2)
             with c3:
-                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="h_v4_src")
-                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="w_v4_src")
-                bmi = weight / ((height / 100.0) ** 2)
+                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v5_src")
+                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v5_src")
+                
+                height_m = height / 100.0
+                bmi = weight / (height_m * height_m)
+                if bmi < 18.5: bmi_status = "저체중 (체중 관리 필요)"; bmi_color = "#0284c7"
+                elif 18.5 <= bmi < 23.0: bmi_status = "정상 체중"; bmi_color = "#16a34a"
+                elif 23.0 <= bmi < 25.0: bmi_status = "과체중 (주의)"; bmi_color = "#d97706"
+                else: bmi_status = "비만 (경계/관리 필요)"; bmi_color = "#dc2626"
+                
                 st.markdown(f"""
                 <div class="bmi-box">
-                    <b>📐 실시간 계산 BMI 지수:</b> {bmi:.1f} kg/m²
+                    <b>📐 실시간 계산 BMI 지수:</b> {bmi:.1f} kg/m²<br/>
+                    <b>📊 상태 진단:</b> <span style="color:{bmi_color}; font-weight:700;">{bmi_status}</span>
                 </div>
                 """, unsafe_allow_html=True)
                 
             st.divider()
+            
+            # STEP 2 (완벽 복구)
+            st.markdown("### 🏃‍♂️ STEP 2. 라이프스타일 & 일상 습관 (Lifestyle)")
+            l1, l2, l3 = st.columns(3)
+            with l1:
+                workout_goals = st.multiselect(
+                    "2-1. 운동 종류 및 목적 (복수 선택)",
+                    ["근력 운동/웨이트", "유산소/러닝", "요가/필라테스", "골프/수영/등산", "운동 하지 않음", "체중 조절/다이어트"]
+                )
+            with l2:
+                drinking = st.selectbox("2-2. 음주 빈도", ["마시지 않음", "주 1~2회", "주 3회 이상"])
+                caffeine = st.selectbox("하루 카페인 섭취량", ["커피 안 마심", "하루 1잔", "하루 2~3잔 이상 (고카페인)"])
+            with l3:
+                st.markdown("2-3. 자가 평가 (1: 매우 낮음 ~ 5: 매우 높음)")
+                diet_score = st.slider("균형 잡힌 식습관 정도", 1, 5, 3)
+                sleep_score = st.slider("수면 만족도 및 유의성", 1, 5, 3)
+                stress_score = st.slider("스트레스 인지 수준", 1, 5, 3)
+                
+            st.divider()
+            
+            # STEP 3 (완벽 복구)
+            st.markdown("### 🩺 STEP 3. 건강 상태 & 안전성 필터 (Medical & Safety) ★")
+            m1, m2, m3 = st.columns(3)
+            with m1:
+                smoking = st.radio("3-1. 흡연 여부", ["비흡연", "흡연"], horizontal=True)
+            with m2:
+                allergies = st.multiselect(
+                    "3-2. 알레르기 유발 성분 선택",
+                    ["갑각류(게/새우)", "대두/콩", "우유/유제품", "계란", "견과류", "밀/글루텐", "해산물/어류"]
+                )
+                side_effect_input = st.text_input("부작용 경험 성분 직접 입력 (예: 속쓰림, 붉은 반점 등)")
+            with m3:
+                diseases = st.multiselect(
+                    "3-3. 지병 및 복용 약물 (공공데이터 안전 필터 연동)",
+                    ["고혈압", "당뇨", "이상지질혈증(고지혈증)", "만성 위장 질환", "혈전 관련 질환/아스피린 복용", "간/신장 질환", "없음"]
+                )
+                
+            st.divider()
+            
+            # STEP 4
             st.markdown("### 🎯 STEP 4. 건강 고민 및 목표 (Health Goals)")
             health_goals = st.multiselect(
                 "4-1. 가장 개선하고 싶은 건강 고민 (⚠️ 최대 2개 선택 가능)",
@@ -414,8 +454,37 @@ def main():
                 default=["만성 피로", "관절 보호"],
                 max_selections=2
             )
-            
+            if len(health_goals) == 0:
+                st.caption("💡 최소 1개 이상의 건강 고민을 선택하시면 맞춤 추천 정확도가 상승합니다.")
+            elif len(health_goals) > 2:
+                st.error("⚠️ 건강 고민은 최대 2개까지만 선택할 수 있습니다.")
+                
             st.divider()
+            
+            # STEP 5
+            st.markdown("### 💊 STEP 5. 섭취 편의성 및 구매 성향 (Preference)")
+            p1, p2, p3 = st.columns(3)
+            with p1:
+                pill_difficulty = st.radio("5-1. 알약(정제/캡슐) 삼킬 때 불편함", ["상관없음", "매우 불편함"], horizontal=True)
+                preferred_forms = []
+                if pill_difficulty == "매우 불편함":
+                    st.info("👉 알약 삼킴이 불편하신 분을 위해 대안 제형 제품만 선별해 드립니다.")
+                    preferred_forms = st.multiselect(
+                        "선호하는 대안 제형 (복수 선택)",
+                        ["구미/젤리", "액상/드링크", "분말/포", "소형 알약", "스트립/필름"],
+                        default=["구미/젤리", "액상/드링크"]
+                    )
+            with p2:
+                important_values = st.multiselect(
+                    "5-2. 중요하게 생각하는 가치 (최대 2개)",
+                    ["가성비", "식약처 인증 성분", "브랜드 신뢰도", "섭취 편의성", "높은 후기/평점"],
+                    max_selections=2
+                )
+            with p3:
+                budget_range = st.selectbox("5-3. 월 예산 범위", ["제한 없음", "3만원 이하", "3만원~5만원", "5만원~10만원", "10만원 이상"], index=2)
+                preferred_form_all = st.multiselect("5-4. 일반 선호 제형 추가 선택", ["정제", "캡슐", "구미/젤리", "액상/드링크", "분말/포", "스트립/필름"])
+
+            st.markdown("<br/>", unsafe_allow_html=True)
             diagnose_click = st.button("🚀 AI 맞춤 영양제 진단 및 큐레이션 받기", type="primary", use_container_width=True)
             
             if diagnose_click:
@@ -423,6 +492,39 @@ def main():
                 st.markdown("## 🔍 AI 추천 엔진 진단 및 고민별 맞춤 큐레이션 결과")
                 
                 df_filtered = df.copy()
+                filter_reasons = []
+                
+                if smoking == "흡연":
+                    before_cnt = len(df_filtered)
+                    mask = df_filtered['matched_ingredient'].str.contains('비타민 A|비타민A|베타카로틴', na=False) | \
+                           df_filtered['product_name'].str.contains('비타민 A|비타민A|베타카로틴|레티놀', na=False)
+                    df_filtered = df_filtered[~mask]
+                    filter_reasons.append(f"흡연자 폐질환 위험 방지를 위해 비타민A/베타카로틴 성분 제외 ({before_cnt - len(df_filtered)}건 필터링)")
+                    
+                if female_status in ["임신 중", "수유 중"] or "혈전 관련 질환/아스피린 복용" in diseases:
+                    before_cnt = len(df_filtered)
+                    mask = (df_filtered['hard_filter_trigger'] == 'PREGNANCY_HAZARD') | \
+                           df_filtered['matched_ingredient'].str.contains('오메가|비타민 K|비타민K', na=False) | \
+                           df_filtered['product_name'].str.contains('오메가|비타민K', na=False)
+                    df_filtered = df_filtered[~mask]
+                    filter_reasons.append(f"임산부/혈전 주의를 위해 고함량 비타민A 및 오메가3/비타민K 성분 제외 ({before_cnt - len(df_filtered)}건 필터링)")
+
+                if "갑각류(게/새우)" in allergies:
+                    df_filtered = df_filtered[df_filtered['hard_filter_trigger'] != 'ALLERGY_CRUSTACEAN']
+                    df_filtered = df_filtered[~df_filtered['product_name'].str.contains('키토산|갑각류|게|새우', na=False)]
+                if "대두/콩" in allergies:
+                    df_filtered = df_filtered[df_filtered['hard_filter_trigger'] != 'ALLERGY_SOY']
+                if "우유/유제품" in allergies:
+                    df_filtered = df_filtered[df_filtered['hard_filter_trigger'] != 'ALLERGY_MILK']
+                    
+                if pill_difficulty == "매우 불편함":
+                    before_cnt = len(df_filtered)
+                    allowed_forms = preferred_forms if preferred_forms else ["구미/젤리", "액상/드링크", "분말/포", "스트립/필름"]
+                    df_filtered = df_filtered[df_filtered['form_type'].isin(allowed_forms)]
+                    filter_reasons.append(f"삼킴 불편 해소를 위한 대안 제형({', '.join(allowed_forms)})만 선별 ({before_cnt - len(df_filtered)}건 필터링)")
+                elif preferred_form_all:
+                    df_filtered = df_filtered[df_filtered['form_type'].isin(preferred_form_all)]
+
                 goal_ingredient_map = {
                     "만성 피로": ["비타민 B", "밀크씨슬", "홍삼", "아르기닌"],
                     "눈 건조": ["루테인", "아스타잔틴", "지아잔틴"],
@@ -436,6 +538,11 @@ def main():
                     "생리 불순": ["이소플라본", "감마리놀렌산", "엽산", "철분"]
                 }
                 
+                st.success(f"✅ 총 {len(df):,}개 영양제 중 안전성 및 제형 검증 후 {len(df_filtered):,}개 적합 제품군이 선별되었습니다.")
+                if filter_reasons:
+                    with st.expander("🛡️ 적용된 안전 및 제형 필터 세부 내역 확인"):
+                        for r in filter_reasons: st.write(f"• {r}")
+
                 final_recommendations = []
                 used_product_ids = set()
                 for goal in health_goals:
@@ -488,11 +595,11 @@ def main():
                         """, unsafe_allow_html=True)
                         
                         if is_in_cart:
-                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_src"):
+                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v5_src"):
                                 remove_from_cart(pid)
                                 st.rerun()
                         else:
-                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_src", type="secondary"):
+                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v5_src", type="secondary"):
                                 add_to_cart(row)
                                 st.rerun()
 
@@ -503,7 +610,6 @@ def main():
         st.subheader("🏷️ 카테고리별 인기 영양제 & 원클릭 퀵 알약 칩")
         st.caption("원하는 퀵 칩 태그를 클릭하여 원료별 인기 랭킹을 즉시 조회하세요.")
         
-        # 🏷️ 원클릭 퀵 알약 칩 UI
         st.markdown("##### 💡 퀵 알약 칩 태그 선택 (Quick Pill Chips)")
         pill_cols = st.columns(7)
         quick_chips = [
@@ -519,7 +625,7 @@ def main():
         selected_cat_pill = None
         for i, (chip_label, target_cat) in enumerate(quick_chips):
             with pill_cols[i]:
-                if st.button(chip_label, key=f"chip_btn_{i}_src", use_container_width=True):
+                if st.button(chip_label, key=f"chip_btn_{i}_v5_src", use_container_width=True):
                     selected_cat_pill = target_cat
 
         available_categories = [
@@ -537,7 +643,7 @@ def main():
         if selected_cat_pill and selected_cat_pill in available_categories:
             default_idx = available_categories.index(selected_cat_pill)
             
-        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v4_src")
+        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v5_src")
         
         df_cat = df.copy() if selected_cat == "전체 카테고리 보기" else df[df['matched_ingredient'] == selected_cat]
         df_cat_top10 = df_cat.sort_values(by='popularity_score', ascending=False).head(10)
@@ -567,7 +673,7 @@ def main():
     # ==========================================
     with tab3:
         st.subheader("🎂 연령대별 인기 영양제")
-        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v4_src")
+        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v5_src")
         age_weights = {
             "20대": ["비타민 B군·비오틴(에너지·활력)", "프로바이오틱스(유산균/장 건강)"],
             "30대": ["비타민 B군·비오틴(에너지·활력)", "rTG 오메가-3(혈관·혈행)", "마그네슘(신경·근육)"],
@@ -621,7 +727,7 @@ def main():
                     st.markdown(f"**{r['product_name']}** | {r['brand']}")
                     st.caption(f"가격: {int(r['price']):,}원 (1일 약 {r['daily_cost']:,}원) | 주요 성분: {r['matched_ingredient']}")
                 with cc3:
-                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_src"):
+                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v5_src"):
                         remove_from_cart(pid)
                         st.rerun()
 
@@ -653,23 +759,71 @@ def main():
             """, unsafe_allow_html=True)
 
     # ==========================================
-    # [탭 6] 영양제 검색 & 스펙 비교
+    # [탭 6] 영양제 검색 & 스펙 비교 (3개 1:1 비교 영역 완벽 복구)
     # ==========================================
     with tab6:
-        st.subheader("🔍 전체 28,239개 영양제 다중 키워드 검색 & 1:1 비교")
-        search_query = st.text_input("🔎 검색어 입력 (예: '종근당 비타민', '고려은단 C')", value="종근당 비타민", key="sq_v4_src")
+        st.subheader("🔍 전체 28,239개 영양제 다중 키워드 검색 & 1:1 스펙 비교")
+        st.caption("공백 단위 멀티 키워드 검색 지원 (예: '종근당 비타민', '고려은단 C', '오쏘몰 7일분')")
+        
+        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v5_src")
+        
         if search_query.strip():
             tokens = search_query.strip().split()
-            mask = df.apply(lambda r: all(tok.lower() in f"{r['product_name']} {r['brand']} {r['matched_ingredient']}".lower() for tok in tokens), axis=1)
+            def match_all_tokens(row):
+                full_text = f"{row['product_name']} {row['brand']} {row['matched_ingredient']} {row['functionality_raw']}".lower()
+                return all(tok.lower() in full_text for tok in tokens)
+
+            mask = df.apply(match_all_tokens, axis=1)
             search_df = df[mask].sort_values(by='popularity_score', ascending=False)
+            
             st.markdown(f"📊 **'{search_query}'** 검색 결과: 총 **{len(search_df):,}**건 검색되었습니다.")
             
             if not search_df.empty:
                 st.dataframe(
-                    search_df[['platform', 'brand', 'product_name', 'price', 'daily_cost', 'rating', 'review_count', 'matched_ingredient']].reset_index(drop=True),
+                    search_df[['platform', 'brand', 'product_name', 'price', 'daily_cost', 'rating', 'review_count', 'matched_ingredient', 'form_type']].reset_index(drop=True),
                     use_container_width=True,
                     height=320
                 )
+                
+                # ⚖️ 영양제 3개 선택 1:1 스펙 & 실물 이미지 비교 영역 (완벽 복구)
+                st.divider()
+                st.markdown("#### ⚖️ 검색 결과 중 최대 3개 제품 1:1 스펙 & 실물 이미지 비교")
+                product_options = search_df['product_name'].unique()[:40]
+                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v5_src")
+                
+                if selected_products:
+                    comp_df = search_df[search_df['product_name'].isin(selected_products)].drop_duplicates(subset=['product_name'])
+                    comp_cols = st.columns(len(comp_df))
+                    
+                    for idx, (_, row) in enumerate(comp_df.iterrows()):
+                        p_url = get_purchase_url(row['platform'], row['product_name'])
+                        img_src = get_product_img(row['img_url'])
+                        pid = str(row['product_id'])
+                        is_in_cart = pid in st.session_state.cart
+                        
+                        with comp_cols[idx]:
+                            st.markdown(f"""
+                            <div class="custom-card" style="text-align:center;">
+                                <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
+                                <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#0e462d;">{row['product_name']}</h5>
+                                <p style="margin-bottom:0.3rem; font-size:0.9rem;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
+                                <p style="margin-bottom:0.3rem; color:#1b7a4e; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
+                                <p style="margin-bottom:0.3rem; color:#6b21a8; font-size:0.95rem;"><b>💰 1일 섭취비용:</b> 약 {row['daily_cost']:,}원/일</p>
+                                <p style="margin-bottom:0.3rem;"><b>평점:</b> ⭐ {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
+                                <p style="margin-bottom:0.3rem;"><b>주요 성분:</b> {row['matched_ingredient']}</p>
+                                <p style="margin-bottom:0.5rem;"><b>제형:</b> {row['form_type']}</p>
+                                <a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            if is_in_cart:
+                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v5_src"):
+                                    remove_from_cart(pid)
+                                    st.rerun()
+                            else:
+                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v5_src", type="secondary"):
+                                    add_to_cart(row)
+                                    st.rerun()
 
 
 if __name__ == "__main__":
