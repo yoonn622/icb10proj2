@@ -1,11 +1,11 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
 
-주요 기능 및 오류 해결:
-1. Streamlit 마크다운 HTML 렌더링 오류 근본 해결 (HTML 태그 좌측 공백 제거로 마크다운 코드블록 오파싱 방지)
-2. 최상단 헤드카피 뱅크 ('내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!') 배치
-3. 카테고리 6개 2열 3행 (2x3 Grid) 가독성 극대화 레이아웃
-4. 아이보리(#FAF8F5) 배경, 딥 포레스트 그린(#1B4D3E) 폰트, 포인트 노랑(#F59E0B) 디자인 적용
+주요 기능 및 디벨롭 내역:
+1. 인트로 페이지 내 불필요한 중간 카테고리 버튼 바 전면 제거
+2. '서비스 주요 카테고리 둘러보기 (2열 3행)' 타이틀 텍스트 제거로 깔끔하고 심플한 레이아웃 완성
+3. 서브 페이지 진입 시 '🏠 인트로 홈으로 돌아가기' 스마트 네비게이션 제공
+4. 아이보리(#FAF8F5) 배경, 딥 그린(#1B4D3E) 폰트, 포인트 노랑(#F59E0B) 고감도 UI 디자인 유지
 """
 
 import os
@@ -475,7 +475,7 @@ def main():
     if df.empty:
         return
 
-    # 🌟 🌟 🌟 [요구사항 3번] 최상단 헤드카피 배치 (HTML 들여쓰기 공백 제거로 렌더링 오류 방지) 🌟 🌟 🌟
+    # 🌟 최상단 헤드카피 뱅크 ('내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!')
     top_hero_html = """<div class="intro-hero-card">
 <span class="sub-badge">💊 내가 찾던 영양제</span>
 <h1 class="head-title">나만을 위한 맞춤 영양제를<br/>찾아드려요!</h1>
@@ -506,29 +506,14 @@ def main():
 </div>"""
     st.markdown(top_hero_html, unsafe_allow_html=True)
 
-    # 🌟 상단 탭 / 카테고리 네비게이션 바
-    pages = {
-        "intro": "🏠 인트로 홈",
-        "diagnosis": "🧬 스마트 문진 & AI 진단",
-        "category": "🏷️ 카테고리별 인기 영양제",
-        "age": "🎂 연령대별 인기 영양제",
-        "cart": f"🛒 내 보관함 ({len(st.session_state.cart)}개)",
-        "synergy": "💊 영양제 시너지 가이드",
-        "search": "🔍 영양제 검색 & 비교"
-    }
-
-    # 상단 Navigation
-    nav_cols = st.columns(7)
-    page_keys = list(pages.keys())
-    for idx, p_key in enumerate(page_keys):
-        with nav_cols[idx]:
-            is_active = (st.session_state.current_page == p_key)
-            btn_type = "primary" if is_active else "secondary"
-            if st.button(pages[p_key], key=f"top_nav_{p_key}", type=btn_type, use_container_width=True):
-                st.session_state.current_page = p_key
+    # 🌟 서브 페이지일 경우, 최상단에 '🏠 인트로 홈으로 돌아가기' 스마트 네비게이션 배치
+    if st.session_state.current_page != "intro":
+        back_col1, back_col2 = st.columns([1.5, 5])
+        with back_col1:
+            if st.button("🏠 인트로 홈으로 돌아가기", key="btn_back_to_intro", type="primary", use_container_width=True):
+                st.session_state.current_page = "intro"
                 st.rerun()
-
-    st.markdown("<hr style='margin:1rem 0 1.5rem 0; border-color:#E6DFD3;'/>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin:0.8rem 0 1.2rem 0; border-color:#E6DFD3;'/>", unsafe_allow_html=True)
 
     # 🛒 상단 스마트 보관함 미니 요약 바 (보관함에 담긴 항목이 있을 경우)
     cart_count = len(st.session_state.cart)
@@ -552,7 +537,7 @@ def main():
     # ==========================================
     if st.session_state.current_page == "intro":
         # 메인 진단 시작 CTA 버튼
-        st.markdown("<div style='text-align:center; margin-bottom:0.8rem;'><span style='font-size:2.2rem;'>🔽</span></div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center; margin-bottom:1.2rem;'><span style='font-size:2.2rem;'>🔽</span></div>", unsafe_allow_html=True)
         
         c_left, c_mid, c_right = st.columns([1, 2, 1])
         with c_mid:
@@ -560,11 +545,9 @@ def main():
                 st.session_state.current_page = "diagnosis"
                 st.rerun()
         
-        st.markdown("<br/>", unsafe_allow_html=True)
+        st.markdown("<br/><br/>", unsafe_allow_html=True)
         
-        # 🌟 🌟 🌟 [요구사항 2번] 카테고리 6개 2열 3행 (2x3 Grid) 가독성 극대화 배치 🌟 🌟 🌟
-        st.markdown("<h3 style='text-align:center; font-weight:900; color:#1B4D3E; margin-bottom:1.8rem;'>⚡ 서비스 주요 카테고리 둘러보기 (2열 3행)</h3>", unsafe_allow_html=True)
-        
+        # 🌟 🌟 🌟 2열 3행 (2x3 Grid) 카테고리 카드 🌟 🌟 🌟
         # Row 1 (카테고리 1, 2)
         r1_c1, r1_c2 = st.columns(2)
         with r1_c1:
