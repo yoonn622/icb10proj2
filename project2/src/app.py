@@ -2,15 +2,16 @@
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
 
 주요 기능 및 디자인 업데이트:
-1. 인트로 페이지 도입: '내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!' 헤드카피와 감각적인 알약 비주얼 배치
-2. 사용자 친화적 카테고리 이동 UX (인트로 CTA 및 상단 탭/네비게이션 연동)
-3. 아이보리(#FAF8F5) 배경, 산뜻한 녹색(#1B4D3E) 폰트, 노란색(#F59E0B) 포인트 컬러를 반영한 고감도 UI 디자인
-4. 스마트 문진/AI 진단, 카테고리/연령대별 인기 영양제, 내 영양제 보관함 중복 분석, 시너지 가이드, 스펙 비교 지원
+1. 최상단 헤드카피 배치: '내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!' 카피를 화면 최상단에 배치
+2. HTML 마크다운 들여쓰기 렌더링 오류 수정 (textwrap.dedent 적용 및 HTML 태그 정상 출력)
+3. 카테고리 6개 2열 3행 (2x3 Grid) 가독성 극대화 배치
+4. 아이보리(#FAF8F5) 배경, 산뜻한 녹색(#1B4D3E) 폰트, 노란색(#F59E0B) 포인트 컬러를 반영한 고감도 UI 디자인
 """
 
 import os
 import sys
 import re
+import textwrap
 from urllib.parse import quote_plus
 import pandas as pd
 import numpy as np
@@ -28,276 +29,290 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-CUSTOM_CSS = """
+CUSTOM_CSS = textwrap.dedent("""
 <style>
-    /* 전체 앱 주요 배경: 아이보리 톤 (#FAF8F5) */
-    .stApp {
-        background-color: #FAF8F5 !important;
-        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    }
+/* 전체 앱 주요 배경: 아이보리 톤 (#FAF8F5) */
+.stApp {
+    background-color: #FAF8F5 !important;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
 
-    /* 기본 폰트 컬러: 선명하고 깊이 있는 딥 그린 (#1B4D3E) */
-    h1, h2, h3, h4, h5, h6, p, label, span, div {
-        color: #1B4D3E;
-    }
-    
-    .stMarkdown, .stText {
-        color: #1B4D3E !important;
-    }
+/* 기본 폰트 컬러: 선명하고 깊이 있는 딥 그린 (#1B4D3E) */
+h1, h2, h3, h4, h5, h6, p, label, span, div {
+    color: #1B4D3E;
+}
 
-    /* 메인 인트로 히어로 섹션 스타일링 */
-    .intro-hero-card {
-        background: linear-gradient(145deg, #FFFDF8 0%, #F5F0E6 100%);
-        border: 2px solid #E6DFD3;
-        border-radius: 28px;
-        padding: 3.5rem 2rem;
-        text-align: center;
-        margin-bottom: 2rem;
-        box-shadow: 0 12px 35px rgba(27, 77, 62, 0.06);
-        position: relative;
-    }
+.stMarkdown, .stText {
+    color: #1B4D3E !important;
+}
 
-    /* 노란색 포인트 소제목 배지 */
-    .sub-badge {
-        display: inline-block;
-        background-color: #FEF08A;
-        color: #854D0E !important;
-        font-weight: 800;
-        font-size: 1.05rem;
-        padding: 0.45rem 1.4rem;
-        border-radius: 50px;
-        margin-bottom: 1.2rem;
-        border: 1px solid #FDE047;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);
-        letter-spacing: -0.3px;
-    }
+/* 최상단 메인 헤더 & 인트로 히어로 섹션 */
+.intro-hero-card {
+    background: linear-gradient(145deg, #FFFDF8 0%, #F5F0E6 100%);
+    border: 2px solid #E6DFD3;
+    border-radius: 28px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 1.8rem;
+    box-shadow: 0 12px 35px rgba(27, 77, 62, 0.06);
+}
 
-    /* 메인 헤드카피 스타일 */
-    .head-title {
-        font-size: 2.6rem;
-        font-weight: 900;
-        color: #1B4D3E !important;
-        letter-spacing: -1px;
-        line-height: 1.35;
-        margin-bottom: 1rem;
-    }
+/* 노란색 포인트 소제목 배지 */
+.sub-badge {
+    display: inline-block;
+    background-color: #FEF08A;
+    color: #854D0E !important;
+    font-weight: 800;
+    font-size: 1.05rem;
+    padding: 0.45rem 1.4rem;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    border: 1px solid #FDE047;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);
+    letter-spacing: -0.3px;
+}
 
-    .head-desc {
-        font-size: 1.15rem;
-        color: #2D6A4F !important;
-        font-weight: 500;
-        margin-bottom: 2rem;
-    }
+/* 메인 헤드카피 스타일 */
+.head-title {
+    font-size: 2.7rem;
+    font-weight: 900;
+    color: #1B4D3E !important;
+    letter-spacing: -1px;
+    line-height: 1.35;
+    margin-bottom: 0.8rem;
+    margin-top: 0.2rem;
+}
 
-    /* 그래픽 & 알약 아카이빙 비주얼 컨테이너 */
-    .pill-visual-box {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 20px;
-        margin: 2.2rem 0;
-        flex-wrap: wrap;
-    }
+.head-desc {
+    font-size: 1.15rem;
+    color: #2D6A4F !important;
+    font-weight: 500;
+    margin-bottom: 1.8rem;
+}
 
-    .pill-card-item {
-        background: #FFFFFF;
-        border: 1px solid #E2D9C8;
-        border-radius: 20px;
-        padding: 1.2rem 1.8rem;
-        box-shadow: 0 6px 18px rgba(27, 77, 62, 0.05);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transition: transform 0.2s ease;
-    }
+/* 알약 비주얼 컨테이너 */
+.pill-visual-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin: 1.8rem 0 0.5rem 0;
+    flex-wrap: wrap;
+}
 
-    .pill-card-item:hover {
-        transform: translateY(-4px);
-    }
+.pill-card-item {
+    background: #FFFFFF;
+    border: 1px solid #E2D9C8;
+    border-radius: 18px;
+    padding: 1.1rem 1.6rem;
+    box-shadow: 0 6px 18px rgba(27, 77, 62, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-    .pill-icon {
-        font-size: 2.2rem;
-    }
+.pill-icon {
+    font-size: 2rem;
+}
 
-    .pill-text-title {
-        font-weight: 800;
-        font-size: 1.05rem;
-        color: #1B4D3E !important;
-        margin: 0;
-    }
+.pill-text-title {
+    font-weight: 800;
+    font-size: 1rem;
+    color: #1B4D3E !important;
+    margin: 0;
+}
 
-    .pill-text-sub {
-        font-size: 0.88rem;
-        color: #52796F !important;
-        margin: 0;
-    }
+.pill-text-sub {
+    font-size: 0.85rem;
+    color: #52796F !important;
+    margin: 0;
+}
 
-    /* 카드 박스 스타일링 (아이보리/화이트) */
-    .custom-card {
-        background-color: #FFFFFF !important;
-        color: #1B4D3E !important;
-        border-radius: 20px;
-        padding: 1.6rem;
-        margin-bottom: 1.2rem;
-        border: 1px solid #E6DFD3;
-        box-shadow: 0 4px 16px rgba(27, 77, 62, 0.04);
-    }
+/* 카드 박스 스타일링 (아이보리/화이트) */
+.custom-card {
+    background-color: #FFFFFF !important;
+    color: #1B4D3E !important;
+    border-radius: 20px;
+    padding: 1.6rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid #E6DFD3;
+    box-shadow: 0 4px 16px rgba(27, 77, 62, 0.04);
+}
 
-    /* 상단 네비게이션 헤더 */
-    .nav-header {
-        background-color: #1B4D3E;
-        color: #FFFFFF !important;
-        padding: 1rem 1.8rem;
-        border-radius: 16px;
-        margin-bottom: 1.8rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 4px 18px rgba(27, 77, 62, 0.15);
-    }
+/* 2x3 그리드용 카테고리 카드 */
+.grid-card {
+    background-color: #FFFFFF !important;
+    border: 2px solid #E6DFD3;
+    border-radius: 22px;
+    padding: 1.8rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(27, 77, 62, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
 
-    .nav-title {
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: #FFFFFF !important;
-        margin: 0;
-    }
+.grid-card:hover {
+    transform: translateY(-4px);
+    border-color: #F59E0B;
+}
 
-    /* BMI 결과 박스 */
-    .bmi-box {
-        background-color: #FFFDF8 !important;
-        color: #1B4D3E !important;
-        border: 2px solid #1B4D3E !important;
-        border-left: 6px solid #F59E0B !important;
-        padding: 1.2rem 1.4rem;
-        border-radius: 16px;
-        margin-top: 0.5rem;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-    }
+.grid-card-icon {
+    font-size: 2.8rem;
+    margin-bottom: 0.6rem;
+}
 
-    /* 배지 컬러 가이드 (포인트 노랑 및 테마) */
-    .badge-yellow {
-        background-color: #FEF08A;
-        color: #854D0E !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
+.grid-card-title {
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: #1B4D3E !important;
+    margin-bottom: 0.5rem;
+}
 
-    .badge-green {
-        background-color: #E8F5E9;
-        color: #1B4D3E !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
+.grid-card-desc {
+    font-size: 0.92rem;
+    color: #52796F !important;
+    margin-bottom: 1.2rem;
+    line-height: 1.45;
+}
 
-    .badge-price {
-        background-color: #F3E8FF;
-        color: #6B21A8 !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
+/* BMI 결과 박스 */
+.bmi-box {
+    background-color: #FFFDF8 !important;
+    color: #1B4D3E !important;
+    border: 2px solid #1B4D3E !important;
+    border-left: 6px solid #F59E0B !important;
+    padding: 1.2rem 1.4rem;
+    border-radius: 16px;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
 
-    .top-product-card {
-        background: #FFFFFF !important;
-        color: #1B4D3E !important;
-        border: 2px solid #1B4D3E;
-        border-radius: 20px;
-        padding: 1.3rem;
-        margin-bottom: 1.2rem;
-        box-shadow: 0 8px 20px rgba(27, 77, 62, 0.08);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 560px;
-    }
+/* 배지 컬러 가이드 */
+.badge-yellow {
+    background-color: #FEF08A;
+    color: #854D0E !important;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-block;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+}
 
-    .product-img-box {
-        width: 100%;
-        height: 170px;
-        object-fit: contain;
-        border-radius: 14px;
-        background-color: #FAF8F5;
-        padding: 0.5rem;
-        margin-bottom: 0.8rem;
-        border: 1px solid #E6DFD3;
-    }
+.badge-green {
+    background-color: #E8F5E9;
+    color: #1B4D3E !important;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-block;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+}
 
-    .buy-btn {
-        display: block;
-        width: 100%;
-        text-align: center;
-        background-color: #1B4D3E;
-        color: #FFFFFF !important;
-        font-weight: 700;
-        padding: 0.7rem 1rem;
-        border-radius: 12px;
-        text-decoration: none;
-        margin-top: 0.4rem;
-        margin-bottom: 0.4rem;
-        transition: background-color 0.2s ease;
-    }
-    .buy-btn:hover {
-        background-color: #0E3429;
-        color: #FFFFFF !important;
-        text-decoration: none;
-    }
+.badge-price {
+    background-color: #F3E8FF;
+    color: #6B21A8 !important;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-block;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+}
 
-    .cart-buy-btn {
-        display: inline-block;
-        width: 100%;
-        text-align: center;
-        background-color: #F59E0B;
-        color: #FFFFFF !important;
-        font-weight: 800;
-        padding: 0.55rem 0.8rem;
-        border-radius: 10px;
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: background-color 0.2s ease;
-    }
-    .cart-buy-btn:hover {
-        background-color: #D97706;
-        color: #FFFFFF !important;
-        text-decoration: none;
-    }
+.top-product-card {
+    background: #FFFFFF !important;
+    color: #1B4D3E !important;
+    border: 2px solid #1B4D3E;
+    border-radius: 20px;
+    padding: 1.3rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 8px 20px rgba(27, 77, 62, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 560px;
+}
 
-    /* Streamlit 기본 버튼 커스터마이징 */
-    .stButton > button {
-        border-radius: 12px !important;
-        font-weight: 700 !important;
-        border: 1px solid #E6DFD3 !important;
-        background-color: #FFFFFF !important;
-        color: #1B4D3E !important;
-    }
+.product-img-box {
+    width: 100%;
+    height: 170px;
+    object-fit: contain;
+    border-radius: 14px;
+    background-color: #FAF8F5;
+    padding: 0.5rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #E6DFD3;
+}
 
-    .stButton > button[kind="primary"] {
-        background-color: #F59E0B !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3) !important;
-    }
-    
-    .stButton > button[kind="primary"]:hover {
-        background-color: #D97706 !important;
-        color: #FFFFFF !important;
-    }
+.buy-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #1B4D3E;
+    color: #FFFFFF !important;
+    font-weight: 700;
+    padding: 0.7rem 1rem;
+    border-radius: 12px;
+    text-decoration: none;
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+    transition: background-color 0.2s ease;
+}
+.buy-btn:hover {
+    background-color: #0E3429;
+    color: #FFFFFF !important;
+    text-decoration: none;
+}
+
+.cart-buy-btn {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    background-color: #F59E0B;
+    color: #FFFFFF !important;
+    font-weight: 800;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+.cart-buy-btn:hover {
+    background-color: #D97706;
+    color: #FFFFFF !important;
+    text-decoration: none;
+}
+
+/* Streamlit 기본 버튼 커스터마이징 */
+.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    border: 1px solid #E6DFD3 !important;
+    background-color: #FFFFFF !important;
+    color: #1B4D3E !important;
+}
+
+.stButton > button[kind="primary"] {
+    background-color: #F59E0B !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3) !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+    background-color: #D97706 !important;
+    color: #FFFFFF !important;
+}
 </style>
-"""
+""")
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 DEFAULT_IMG = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80"
@@ -468,6 +483,41 @@ def main():
     if df.empty:
         return
 
+    # 🌟 🌟 🌟 [요구사항 3번] 최상단 헤드카피 배치 🌟 🌟 🌟
+    # '내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!' 카피가 앱의 최상단에 항상 위치
+    top_hero_html = textwrap.dedent("""
+    <div class="intro-hero-card">
+        <span class="sub-badge">💊 내가 찾던 영양제</span>
+        <h1 class="head-title">나만을 위한 맞춤 영양제를<br/>찾아드려요!</h1>
+        <p class="head-desc">공공데이터(식약처/DUR) 기반 스마트 안전 진단 & 이커머스 랭킹 큐레이션</p>
+        
+        <div class="pill-visual-box">
+            <div class="pill-card-item">
+                <span class="pill-icon">💊</span>
+                <div style="text-align:left;">
+                    <p class="pill-text-title">맞춤 영양성분 큐레이션</p>
+                    <p class="pill-text-sub">내 성별·연령·건강고민 최적화</p>
+                </div>
+            </div>
+            <div class="pill-card-item">
+                <span class="pill-icon">🛡️</span>
+                <div style="text-align:left;">
+                    <p class="pill-text-title">의료 안전성 자동 검증</p>
+                    <p class="pill-text-sub">흡연·질환·알레르기 섭취 필터</p>
+                </div>
+            </div>
+            <div class="pill-card-item">
+                <span class="pill-icon">💰</span>
+                <div style="text-align:left;">
+                    <p class="pill-text-title">1일 섭취 비용 비교</p>
+                    <p class="pill-text-sub">합리적 가격 & 보관함 분석</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    """)
+    st.markdown(top_hero_html, unsafe_allow_html=True)
+
     # 🌟 상단 탭 / 카테고리 네비게이션 바
     pages = {
         "intro": "🏠 인트로 홈",
@@ -479,11 +529,8 @@ def main():
         "search": "🔍 영양제 검색 & 비교"
     }
 
-    # 상단 글로벌 브랜드 라인 & Navigation
-    nav_cols = st.columns([2.5, 1, 1, 1, 1, 1, 1])
-    with nav_cols[0]:
-        st.markdown("<h3 style='margin:0; padding-top:0.2rem; color:#1B4D3E; font-weight:900;'>💊 NutriFit <span style='font-size:0.9rem; font-weight:500; color:#52796F;'>| 초개인화 맞춤 영양제</span></h3>", unsafe_allow_html=True)
-    
+    # 상단 Navigation
+    nav_cols = st.columns(7)
     page_keys = list(pages.keys())
     for idx, p_key in enumerate(page_keys):
         with nav_cols[idx]:
@@ -493,7 +540,7 @@ def main():
                 st.session_state.current_page = p_key
                 st.rerun()
 
-    st.markdown("<hr style='margin:0.8rem 0 1.5rem 0; border-color:#E6DFD3;'/>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin:1rem 0 1.5rem 0; border-color:#E6DFD3;'/>", unsafe_allow_html=True)
 
     # 🛒 상단 스마트 보관함 미니 요약 바 (보관함에 담긴 항목이 있을 경우)
     cart_count = len(st.session_state.cart)
@@ -516,99 +563,118 @@ def main():
     # PAGE 1: 인트로 페이지 (Intro Page)
     # ==========================================
     if st.session_state.current_page == "intro":
-        st.markdown("""
-        <div class="intro-hero-card">
-            <span class="sub-badge">💊 내가 찾던 영양제</span>
-            <h1 class="head-title">나만을 위한 맞춤 영양제를<br/>찾아드려요!</h1>
-            <p class="head-desc">공공데이터(식약처/DUR) 기반 스마트 안전 진단 & 이커머스 랭킹 큐레이션</p>
-            
-            <div class="pill-visual-box">
-                <div class="pill-card-item">
-                    <span class="pill-icon">💊</span>
-                    <div style="text-align:left;">
-                        <p class="pill-text-title">맞춤 영양성분 큐레이션</p>
-                        <p class="pill-text-sub">내 성별·연령·건강고민 최적화</p>
-                    </div>
-                </div>
-                <div class="pill-card-item">
-                    <span class="pill-icon">🛡️</span>
-                    <div style="text-align:left;">
-                        <p class="pill-text-title">의료 안전성 자동 검증</p>
-                        <p class="pill-text-sub">흡연·질환·알레르기 섭취 필터</p>
-                    </div>
-                </div>
-                <div class="pill-card-item">
-                    <span class="pill-icon">💰</span>
-                    <div style="text-align:left;">
-                        <p class="pill-text-title">1일 섭취 비용 비교</p>
-                        <p class="pill-text-sub">합리적 가격 & 보관함 분석</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # 메인 진단 시작 CTA 버튼 (중앙 화살표 및 큰 버튼)
-        st.markdown("<div style='text-align:center; margin-bottom:1rem;'><span style='font-size:2.2rem;'>🔽</span></div>", unsafe_allow_html=True)
+        # 메인 진단 시작 CTA 버튼
+        st.markdown("<div style='text-align:center; margin-bottom:0.8rem;'><span style='font-size:2.2rem;'>🔽</span></div>", unsafe_allow_html=True)
         
         c_left, c_mid, c_right = st.columns([1, 2, 1])
         with c_mid:
-            if st.button("✨ 나에게 필요한 영양제 확인하기 💊", type="primary", key="cta_start_diagnosis", use_container_width=True):
+            if st.button("✨ 나에게 필요한 영양제 바로 진단하기 💊", type="primary", key="cta_start_diagnosis", use_container_width=True):
                 st.session_state.current_page = "diagnosis"
                 st.rerun()
         
-        st.markdown("<br/><br/>", unsafe_allow_html=True)
+        st.markdown("<br/>", unsafe_allow_html=True)
         
-        # 카테고리 퀵 둘러보기 카드 그리드
-        st.markdown("<h3 style='text-align:center; font-weight:800; color:#1B4D3E; margin-bottom:1.5rem;'>⚡ 원하는 카테고리로 빠르게 바로가기</h3>", unsafe_allow_html=True)
+        # 🌟 🌟 🌟 [요구사항 2번] 카테고리 6개 2열 3행 (2x3 Grid) 가독성 극대화 배치 🌟 🌟 🌟
+        st.markdown("<h3 style='text-align:center; font-weight:900; color:#1B4D3E; margin-bottom:1.8rem;'>⚡ 서비스 주요 카테고리 둘러보기 (2열 3행)</h3>", unsafe_allow_html=True)
         
-        q1, q2, q3, q4 = st.columns(4)
-        with q1:
-            st.markdown("""
-            <div class="custom-card" style="text-align:center; padding:1.4rem;">
-                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🧬</div>
-                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">스마트 문진 & AI 진단</h4>
-                <p style="font-size:0.88rem; color:#52796F;">개인 맞춤형 영양제 추천</p>
+        # Row 1 (카테고리 1, 2)
+        r1_c1, r1_c2 = st.columns(2)
+        with r1_c1:
+            st.markdown(textwrap.dedent("""
+            <div class="grid-card">
+                <div>
+                    <div class="grid-card-icon">🧬</div>
+                    <div class="grid-card-title">1. 스마트 문진 & AI 진단</div>
+                    <div class="grid-card-desc">성별·연령·라이프스타일·의료 안전 필터 기반<br/>개인 맞춤형 영양제 AI 스마트 큐레이션</div>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
-            if st.button("문진 시작하기", key="quick_btn_diag", use_container_width=True):
+            """), unsafe_allow_html=True)
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button("🧬 AI 맞춤 문진 시작하기", key="g_btn_diag", type="primary", use_container_width=True):
                 st.session_state.current_page = "diagnosis"
                 st.rerun()
 
-        with q2:
-            st.markdown("""
-            <div class="custom-card" style="text-align:center; padding:1.4rem;">
-                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🏷️</div>
-                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">카테고리별 인기 순위</h4>
-                <p style="font-size:0.88rem; color:#52796F;">원료별 이커머스 TOP 10</p>
+        with r1_c2:
+            st.markdown(textwrap.dedent("""
+            <div class="grid-card">
+                <div>
+                    <div class="grid-card-icon">🏷️</div>
+                    <div class="grid-card-title">2. 카테고리별 인기 영양제</div>
+                    <div class="grid-card-desc">비타민, 오메가3, 유산균, 루테인 등 주요 성분별<br/>이커머스 인기 점수 TOP 10 실시간 랭킹</div>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
-            if st.button("카테고리 보기", key="quick_btn_cat", use_container_width=True):
+            """), unsafe_allow_html=True)
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button("🏷️ 카테고리 인기 순위 보기", key="g_btn_cat", use_container_width=True):
                 st.session_state.current_page = "category"
                 st.rerun()
 
-        with q3:
-            st.markdown("""
-            <div class="custom-card" style="text-align:center; padding:1.4rem;">
-                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🎂</div>
-                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">연령대별 인기 영양제</h4>
-                <p style="font-size:0.88rem; color:#52796F;">20대~60대 맞춤 추천</p>
+        st.markdown("<br/>", unsafe_allow_html=True)
+
+        # Row 2 (카테고리 3, 4)
+        r2_c1, r2_c2 = st.columns(2)
+        with r2_c1:
+            st.markdown(textwrap.dedent("""
+            <div class="grid-card">
+                <div>
+                    <div class="grid-card-icon">🎂</div>
+                    <div class="grid-card-title">3. 연령대별 인기 영양제</div>
+                    <div class="grid-card-desc">20대 피로회복부터 60대 관절·뼈 건강까지<br/>연령대별 선호 영양성분 집중 비교 추천</div>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
-            if st.button("연령대별 보기", key="quick_btn_age", use_container_width=True):
+            """), unsafe_allow_html=True)
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button("🎂 연령대별 추천 보기", key="g_btn_age", use_container_width=True):
                 st.session_state.current_page = "age"
                 st.rerun()
 
-        with q4:
-            st.markdown("""
-            <div class="custom-card" style="text-align:center; padding:1.4rem;">
-                <div style="font-size:2.5rem; margin-bottom:0.5rem;">💊</div>
-                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">시너지 & 타임 가이드</h4>
-                <p style="font-size:0.88rem; color:#52796F;">최고 조합 & 금기 조합</p>
+        with r2_c2:
+            st.markdown(textwrap.dedent("""
+            <div class="grid-card">
+                <div>
+                    <div class="grid-card-icon">🛒</div>
+                    <div class="grid-card-title">4. 내 영양제 보관함 분석</div>
+                    <div class="grid-card-desc">담은 영양제 1일 복용 비용 자동 계산 &<br/>동일 성분 중복 과다 섭취 위험 실시간 진단</div>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
-            if st.button("가이드 확인하기", key="quick_btn_syn", use_container_width=True):
+            """), unsafe_allow_html=True)
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button("🛒 보관함 & 중복 분석 보기", key="g_btn_cart", use_container_width=True):
+                st.session_state.current_page = "cart"
+                st.rerun()
+
+        st.markdown("<br/>", unsafe_allow_html=True)
+
+        # Row 3 (카테고리 5, 6)
+        r3_c1, r3_c2 = st.columns(2)
+        with r3_c1:
+            st.markdown(textwrap.dedent("""
+            <div class="grid-card">
+                <div>
+                    <div class="grid-card-icon">💊</div>
+                    <div class="grid-card-title">5. 시너지 & 타임 가이드</div>
+                    <div class="grid-card-desc">함께 먹으면 효과 2배 찰떡 시너지 조합 &<br/>흡수 방해/부작용 주의 동시 복용 금기 가이드</div>
+                </div>
+            </div>
+            """), unsafe_allow_html=True)
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button("💊 시너지 조합 가이드 보기", key="g_btn_syn", use_container_width=True):
                 st.session_state.current_page = "synergy"
+                st.rerun()
+
+        with r3_c2:
+            st.markdown(textwrap.dedent("""
+            <div class="grid-card">
+                <div>
+                    <div class="grid-card-icon">🔍</div>
+                    <div class="grid-card-title">6. 영양제 검색 & 1:1 비교</div>
+                    <div class="grid-card-desc">28,000+개 이커머스 상품 키워드 검색 &<br/>최대 3개 제품 성분·가격·제형 1:1 비교</div>
+                </div>
+            </div>
+            """), unsafe_allow_html=True)
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if st.button("🔍 영양제 검색 & 비교하기", key="g_btn_search", use_container_width=True):
+                st.session_state.current_page = "search"
                 st.rerun()
 
     # ==========================================
@@ -681,7 +747,7 @@ def main():
                 elif 23.0 <= bmi < 25.0: bmi_status = "과체중 (주의)"; bmi_color = "#d97706"
                 else: bmi_status = "비만 (경계/관리 필요)"; bmi_color = "#dc2626"
                 
-                st.markdown(f"""
+                st.markdown(textwrap.dedent(f"""
                 <div class="bmi-box">
                     <div style="margin-bottom:0.3rem;">
                         <span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📐 실시간 계산 BMI 지수:</span> 
@@ -692,7 +758,7 @@ def main():
                         <span style="color:{bmi_color}; font-size:1.2rem; font-weight:800; background-color:#FFFDF8; padding:0.1rem 0.5rem; border-radius:6px; border:1px solid #E6DFD3;">{bmi_status}</span>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """), unsafe_allow_html=True)
                 
             st.divider()
             
@@ -870,7 +936,7 @@ def main():
                     is_in_cart = pid in st.session_state.cart
                     
                     with cols[idx]:
-                        st.markdown(f"""
+                        st.markdown(textwrap.dedent(f"""
                         <div class="top-product-card">
                             <div>
                                 <img src="{img_src}" class="product-img-box" alt="제품 이미지"/>
@@ -888,7 +954,7 @@ def main():
                                 <a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
                             </div>
                         </div>
-                        """, unsafe_allow_html=True)
+                        """), unsafe_allow_html=True)
                         
                         if is_in_cart:
                             if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v10"):
@@ -1045,7 +1111,7 @@ def main():
         g1, g2 = st.columns(2)
         with g1:
             st.markdown("#### 🟢 최고 시너지 찰떡 궁합 BEST 4")
-            st.markdown("""
+            st.markdown(textwrap.dedent("""
             <div class="custom-card" style="border-left: 5px solid #16a34a;">
                 <h5 style="color:#16a34a; margin-bottom:0.3rem;">1. 오메가3 + 비타민 E / 루테인</h5>
                 <p style="font-size:0.95rem; color:#374151;">지용성 영양제인 루테인은 오메가3의 불포화지방산과 함께 섭취 시 체내 흡수율이 대폭 증가하며, 비타민E는 오메가3의 산화를 막아줍니다.</p>
@@ -1054,15 +1120,15 @@ def main():
                 <h5 style="color:#16a34a; margin-bottom:0.3rem;">2. 칼슘 + 비타민 D + 마그네슘 (칼마디)</h5>
                 <p style="font-size:0.95rem; color:#374151;">비타민D가 장에서 칼슘의 흡수를 돕고, 마그네슘은 흡수된 칼슘이 뼈로 잘 이동하도록 촉진하는 대표 상호보완 조합입니다.</p>
             </div>
-            """, unsafe_allow_html=True)
+            """), unsafe_allow_html=True)
         with g2:
             st.markdown("#### 🔴 동시 복용 금기 / 주의 섭취 조합")
-            st.markdown("""
+            st.markdown(textwrap.dedent("""
             <div class="custom-card" style="border-left: 5px solid #dc2626;">
                 <h5 style="color:#dc2626; margin-bottom:0.3rem;">1. 칼슘 vs 철분</h5>
                 <p style="font-size:0.95rem; color:#374151;">두 성분은 체내 이동 통로(흡수 수용체)를 공유하므로 동시 복용 시 서로의 흡수를 섭취 방해합니다. (최소 2시간 차이 권장)</p>
             </div>
-            """, unsafe_allow_html=True)
+            """), unsafe_allow_html=True)
 
     # ==========================================
     # PAGE 7: 영양제 검색 & 스펙 비교
@@ -1108,7 +1174,7 @@ def main():
                         is_in_cart = pid in st.session_state.cart
                         
                         with comp_cols[idx]:
-                            st.markdown(f"""
+                            st.markdown(textwrap.dedent(f"""
                             <div class="custom-card" style="text-align:center;">
                                 <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
                                 <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#1B4D3E;">{row['product_name']}</h5>
@@ -1120,7 +1186,7 @@ def main():
                                 <p style="margin-bottom:0.5rem; color:#333;"><b>제형:</b> {row['form_type']}</p>
                                 <a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """), unsafe_allow_html=True)
                             
                             if is_in_cart:
                                 if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v10"):
