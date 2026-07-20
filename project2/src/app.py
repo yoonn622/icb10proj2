@@ -1,17 +1,16 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
 
-주요 기능 및 디자인 업데이트:
-1. 최상단 헤드카피 배치: '내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!' 카피를 화면 최상단에 배치
-2. HTML 마크다운 들여쓰기 렌더링 오류 수정 (textwrap.dedent 적용 및 HTML 태그 정상 출력)
-3. 카테고리 6개 2열 3행 (2x3 Grid) 가독성 극대화 배치
-4. 아이보리(#FAF8F5) 배경, 산뜻한 녹색(#1B4D3E) 폰트, 노란색(#F59E0B) 포인트 컬러를 반영한 고감도 UI 디자인
+주요 기능 및 오류 해결:
+1. Streamlit 마크다운 HTML 렌더링 오류 근본 해결 (HTML 태그 좌측 공백 제거로 마크다운 코드블록 오파싱 방지)
+2. 최상단 헤드카피 뱅크 ('내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!') 배치
+3. 카테고리 6개 2열 3행 (2x3 Grid) 가독성 극대화 레이아웃
+4. 아이보리(#FAF8F5) 배경, 딥 포레스트 그린(#1B4D3E) 폰트, 포인트 노랑(#F59E0B) 디자인 적용
 """
 
 import os
 import sys
 import re
-import textwrap
 from urllib.parse import quote_plus
 import pandas as pd
 import numpy as np
@@ -20,7 +19,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ==========================================
-# 0. 페이지 기본 설정 및 커스텀 CSS (Ivory & Deep Green & Point Yellow)
+# 0. 페이지 기본 설정 및 커스텀 CSS
 # ==========================================
 st.set_page_config(
     page_title="NutriFit | 나만을 위한 맞춤 영양제 큐레이션",
@@ -29,8 +28,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-CUSTOM_CSS = textwrap.dedent("""
-<style>
+CUSTOM_CSS = """<style>
 /* 전체 앱 주요 배경: 아이보리 톤 (#FAF8F5) */
 .stApp {
     background-color: #FAF8F5 !important;
@@ -51,9 +49,9 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     background: linear-gradient(145deg, #FFFDF8 0%, #F5F0E6 100%);
     border: 2px solid #E6DFD3;
     border-radius: 28px;
-    padding: 3rem 2rem;
+    padding: 2.8rem 1.8rem;
     text-align: center;
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.5rem;
     box-shadow: 0 12px 35px rgba(27, 77, 62, 0.06);
 }
 
@@ -66,7 +64,7 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     font-size: 1.05rem;
     padding: 0.45rem 1.4rem;
     border-radius: 50px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     border: 1px solid #FDE047;
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);
     letter-spacing: -0.3px;
@@ -74,12 +72,12 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
 
 /* 메인 헤드카피 스타일 */
 .head-title {
-    font-size: 2.7rem;
+    font-size: 2.6rem;
     font-weight: 900;
     color: #1B4D3E !important;
     letter-spacing: -1px;
     line-height: 1.35;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.6rem;
     margin-top: 0.2rem;
 }
 
@@ -87,7 +85,7 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     font-size: 1.15rem;
     color: #2D6A4F !important;
     font-weight: 500;
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.5rem;
 }
 
 /* 알약 비주얼 컨테이너 */
@@ -95,8 +93,8 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 18px;
-    margin: 1.8rem 0 0.5rem 0;
+    gap: 16px;
+    margin: 1.5rem 0 0.5rem 0;
     flex-wrap: wrap;
 }
 
@@ -104,7 +102,7 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     background: #FFFFFF;
     border: 1px solid #E2D9C8;
     border-radius: 18px;
-    padding: 1.1rem 1.6rem;
+    padding: 1rem 1.5rem;
     box-shadow: 0 6px 18px rgba(27, 77, 62, 0.05);
     display: flex;
     align-items: center;
@@ -147,34 +145,29 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     padding: 1.8rem 1.5rem;
     text-align: center;
     box-shadow: 0 6px 20px rgba(27, 77, 62, 0.05);
-    height: 100%;
+    min-height: 180px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.grid-card:hover {
-    transform: translateY(-4px);
-    border-color: #F59E0B;
+    justify-content: center;
+    align-items: center;
 }
 
 .grid-card-icon {
-    font-size: 2.8rem;
-    margin-bottom: 0.6rem;
+    font-size: 2.6rem;
+    margin-bottom: 0.5rem;
 }
 
 .grid-card-title {
     font-weight: 900;
     font-size: 1.25rem;
     color: #1B4D3E !important;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
 }
 
 .grid-card-desc {
     font-size: 0.92rem;
     color: #52796F !important;
-    margin-bottom: 1.2rem;
+    margin-bottom: 0;
     line-height: 1.45;
 }
 
@@ -311,8 +304,7 @@ h1, h2, h3, h4, h5, h6, p, label, span, div {
     background-color: #D97706 !important;
     color: #FFFFFF !important;
 }
-</style>
-""")
+</style>"""
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 DEFAULT_IMG = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80"
@@ -483,39 +475,35 @@ def main():
     if df.empty:
         return
 
-    # 🌟 🌟 🌟 [요구사항 3번] 최상단 헤드카피 배치 🌟 🌟 🌟
-    # '내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!' 카피가 앱의 최상단에 항상 위치
-    top_hero_html = textwrap.dedent("""
-    <div class="intro-hero-card">
-        <span class="sub-badge">💊 내가 찾던 영양제</span>
-        <h1 class="head-title">나만을 위한 맞춤 영양제를<br/>찾아드려요!</h1>
-        <p class="head-desc">공공데이터(식약처/DUR) 기반 스마트 안전 진단 & 이커머스 랭킹 큐레이션</p>
-        
-        <div class="pill-visual-box">
-            <div class="pill-card-item">
-                <span class="pill-icon">💊</span>
-                <div style="text-align:left;">
-                    <p class="pill-text-title">맞춤 영양성분 큐레이션</p>
-                    <p class="pill-text-sub">내 성별·연령·건강고민 최적화</p>
-                </div>
-            </div>
-            <div class="pill-card-item">
-                <span class="pill-icon">🛡️</span>
-                <div style="text-align:left;">
-                    <p class="pill-text-title">의료 안전성 자동 검증</p>
-                    <p class="pill-text-sub">흡연·질환·알레르기 섭취 필터</p>
-                </div>
-            </div>
-            <div class="pill-card-item">
-                <span class="pill-icon">💰</span>
-                <div style="text-align:left;">
-                    <p class="pill-text-title">1일 섭취 비용 비교</p>
-                    <p class="pill-text-sub">합리적 가격 & 보관함 분석</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    """)
+    # 🌟 🌟 🌟 [요구사항 3번] 최상단 헤드카피 배치 (HTML 들여쓰기 공백 제거로 렌더링 오류 방지) 🌟 🌟 🌟
+    top_hero_html = """<div class="intro-hero-card">
+<span class="sub-badge">💊 내가 찾던 영양제</span>
+<h1 class="head-title">나만을 위한 맞춤 영양제를<br/>찾아드려요!</h1>
+<p class="head-desc">공공데이터(식약처/DUR) 기반 스마트 안전 진단 & 이커머스 랭킹 큐레이션</p>
+<div class="pill-visual-box">
+<div class="pill-card-item">
+<span class="pill-icon">💊</span>
+<div style="text-align:left;">
+<p class="pill-text-title">맞춤 영양성분 큐레이션</p>
+<p class="pill-text-sub">내 성별·연령·건강고민 최적화</p>
+</div>
+</div>
+<div class="pill-card-item">
+<span class="pill-icon">🛡️</span>
+<div style="text-align:left;">
+<p class="pill-text-title">의료 안전성 자동 검증</p>
+<p class="pill-text-sub">흡연·질환·알레르기 섭취 필터</p>
+</div>
+</div>
+<div class="pill-card-item">
+<span class="pill-icon">💰</span>
+<div style="text-align:left;">
+<p class="pill-text-title">1일 섭취 비용 비교</p>
+<p class="pill-text-sub">합리적 가격 & 보관함 분석</p>
+</div>
+</div>
+</div>
+</div>"""
     st.markdown(top_hero_html, unsafe_allow_html=True)
 
     # 🌟 상단 탭 / 카테고리 네비게이션 바
@@ -580,30 +568,22 @@ def main():
         # Row 1 (카테고리 1, 2)
         r1_c1, r1_c2 = st.columns(2)
         with r1_c1:
-            st.markdown(textwrap.dedent("""
-            <div class="grid-card">
-                <div>
-                    <div class="grid-card-icon">🧬</div>
-                    <div class="grid-card-title">1. 스마트 문진 & AI 진단</div>
-                    <div class="grid-card-desc">성별·연령·라이프스타일·의료 안전 필터 기반<br/>개인 맞춤형 영양제 AI 스마트 큐레이션</div>
-                </div>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="grid-card">
+<div class="grid-card-icon">🧬</div>
+<div class="grid-card-title">1. 스마트 문진 & AI 진단</div>
+<div class="grid-card-desc">성별·연령·라이프스타일·의료 안전 필터 기반<br/>개인 맞춤형 영양제 AI 스마트 큐레이션</div>
+</div>""", unsafe_allow_html=True)
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
             if st.button("🧬 AI 맞춤 문진 시작하기", key="g_btn_diag", type="primary", use_container_width=True):
                 st.session_state.current_page = "diagnosis"
                 st.rerun()
 
         with r1_c2:
-            st.markdown(textwrap.dedent("""
-            <div class="grid-card">
-                <div>
-                    <div class="grid-card-icon">🏷️</div>
-                    <div class="grid-card-title">2. 카테고리별 인기 영양제</div>
-                    <div class="grid-card-desc">비타민, 오메가3, 유산균, 루테인 등 주요 성분별<br/>이커머스 인기 점수 TOP 10 실시간 랭킹</div>
-                </div>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="grid-card">
+<div class="grid-card-icon">🏷️</div>
+<div class="grid-card-title">2. 카테고리별 인기 영양제</div>
+<div class="grid-card-desc">비타민, 오메가3, 유산균, 루테인 등 주요 성분별<br/>이커머스 인기 점수 TOP 10 실시간 랭킹</div>
+</div>""", unsafe_allow_html=True)
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
             if st.button("🏷️ 카테고리 인기 순위 보기", key="g_btn_cat", use_container_width=True):
                 st.session_state.current_page = "category"
@@ -614,30 +594,22 @@ def main():
         # Row 2 (카테고리 3, 4)
         r2_c1, r2_c2 = st.columns(2)
         with r2_c1:
-            st.markdown(textwrap.dedent("""
-            <div class="grid-card">
-                <div>
-                    <div class="grid-card-icon">🎂</div>
-                    <div class="grid-card-title">3. 연령대별 인기 영양제</div>
-                    <div class="grid-card-desc">20대 피로회복부터 60대 관절·뼈 건강까지<br/>연령대별 선호 영양성분 집중 비교 추천</div>
-                </div>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="grid-card">
+<div class="grid-card-icon">🎂</div>
+<div class="grid-card-title">3. 연령대별 인기 영양제</div>
+<div class="grid-card-desc">20대 피로회복부터 60대 관절·뼈 건강까지<br/>연령대별 선호 영양성분 집중 비교 추천</div>
+</div>""", unsafe_allow_html=True)
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
             if st.button("🎂 연령대별 추천 보기", key="g_btn_age", use_container_width=True):
                 st.session_state.current_page = "age"
                 st.rerun()
 
         with r2_c2:
-            st.markdown(textwrap.dedent("""
-            <div class="grid-card">
-                <div>
-                    <div class="grid-card-icon">🛒</div>
-                    <div class="grid-card-title">4. 내 영양제 보관함 분석</div>
-                    <div class="grid-card-desc">담은 영양제 1일 복용 비용 자동 계산 &<br/>동일 성분 중복 과다 섭취 위험 실시간 진단</div>
-                </div>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="grid-card">
+<div class="grid-card-icon">🛒</div>
+<div class="grid-card-title">4. 내 영양제 보관함 분석</div>
+<div class="grid-card-desc">담은 영양제 1일 복용 비용 자동 계산 &<br/>동일 성분 중복 과다 섭취 위험 실시간 진단</div>
+</div>""", unsafe_allow_html=True)
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
             if st.button("🛒 보관함 & 중복 분석 보기", key="g_btn_cart", use_container_width=True):
                 st.session_state.current_page = "cart"
@@ -648,30 +620,22 @@ def main():
         # Row 3 (카테고리 5, 6)
         r3_c1, r3_c2 = st.columns(2)
         with r3_c1:
-            st.markdown(textwrap.dedent("""
-            <div class="grid-card">
-                <div>
-                    <div class="grid-card-icon">💊</div>
-                    <div class="grid-card-title">5. 시너지 & 타임 가이드</div>
-                    <div class="grid-card-desc">함께 먹으면 효과 2배 찰떡 시너지 조합 &<br/>흡수 방해/부작용 주의 동시 복용 금기 가이드</div>
-                </div>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="grid-card">
+<div class="grid-card-icon">💊</div>
+<div class="grid-card-title">5. 시너지 & 타임 가이드</div>
+<div class="grid-card-desc">함께 먹으면 효과 2배 찰떡 시너지 조합 &<br/>흡수 방해/부작용 주의 동시 복용 금기 가이드</div>
+</div>""", unsafe_allow_html=True)
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
             if st.button("💊 시너지 조합 가이드 보기", key="g_btn_syn", use_container_width=True):
                 st.session_state.current_page = "synergy"
                 st.rerun()
 
         with r3_c2:
-            st.markdown(textwrap.dedent("""
-            <div class="grid-card">
-                <div>
-                    <div class="grid-card-icon">🔍</div>
-                    <div class="grid-card-title">6. 영양제 검색 & 1:1 비교</div>
-                    <div class="grid-card-desc">28,000+개 이커머스 상품 키워드 검색 &<br/>최대 3개 제품 성분·가격·제형 1:1 비교</div>
-                </div>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="grid-card">
+<div class="grid-card-icon">🔍</div>
+<div class="grid-card-title">6. 영양제 검색 & 1:1 비교</div>
+<div class="grid-card-desc">28,000+개 이커머스 상품 키워드 검색 &<br/>최대 3개 제품 성분·가격·제형 1:1 비교</div>
+</div>""", unsafe_allow_html=True)
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
             if st.button("🔍 영양제 검색 & 비교하기", key="g_btn_search", use_container_width=True):
                 st.session_state.current_page = "search"
@@ -747,18 +711,16 @@ def main():
                 elif 23.0 <= bmi < 25.0: bmi_status = "과체중 (주의)"; bmi_color = "#d97706"
                 else: bmi_status = "비만 (경계/관리 필요)"; bmi_color = "#dc2626"
                 
-                st.markdown(textwrap.dedent(f"""
-                <div class="bmi-box">
-                    <div style="margin-bottom:0.3rem;">
-                        <span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📐 실시간 계산 BMI 지수:</span> 
-                        <span style="color:#1B4D3E; font-size:1.2rem; font-weight:800; background-color:#FEF08A; padding:0.1rem 0.5rem; border-radius:6px;">{bmi:.1f} kg/m²</span>
-                    </div>
-                    <div>
-                        <span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📊 상태 진단:</span> 
-                        <span style="color:{bmi_color}; font-size:1.2rem; font-weight:800; background-color:#FFFDF8; padding:0.1rem 0.5rem; border-radius:6px; border:1px solid #E6DFD3;">{bmi_status}</span>
-                    </div>
-                </div>
-                """), unsafe_allow_html=True)
+                st.markdown(f"""<div class="bmi-box">
+<div style="margin-bottom:0.3rem;">
+<span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📐 실시간 계산 BMI 지수:</span> 
+<span style="color:#1B4D3E; font-size:1.2rem; font-weight:800; background-color:#FEF08A; padding:0.1rem 0.5rem; border-radius:6px;">{bmi:.1f} kg/m²</span>
+</div>
+<div>
+<span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📊 상태 진단:</span> 
+<span style="color:{bmi_color}; font-size:1.2rem; font-weight:800; background-color:#FFFDF8; padding:0.1rem 0.5rem; border-radius:6px; border:1px solid #E6DFD3;">{bmi_status}</span>
+</div>
+</div>""", unsafe_allow_html=True)
                 
             st.divider()
             
@@ -936,25 +898,23 @@ def main():
                     is_in_cart = pid in st.session_state.cart
                     
                     with cols[idx]:
-                        st.markdown(textwrap.dedent(f"""
-                        <div class="top-product-card">
-                            <div>
-                                <img src="{img_src}" class="product-img-box" alt="제품 이미지"/>
-                                <span class="badge-yellow">🎯 고민: {g_name}</span>
-                                <span class="badge-green">{row['platform'].upper()}</span>
-                                <span class="badge-price">💰 1일 약 {int(row['daily_cost']):,}원</span>
-                                <h4 style="margin-top:0.5rem; color:#1B4D3E; font-size:1.05rem; min-height: 2.6rem;">{row['product_name']}</h4>
-                                <p style="margin-bottom:0.2rem; color:#444; font-size:0.9rem;"><b>브랜드:</b> {row['brand']}</p>
-                                <p style="margin-bottom:0.2rem; color:#1B4D3E; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
-                                <p style="margin-bottom:0.4rem; color:#333; font-size:0.85rem;"><b>⭐ 평점:</b> {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
-                                <hr style="margin:0.5rem 0; border-color:#E6DFD3;"/>
-                                <p style="font-size:0.85rem; color:#333;"><b>🧪 주요 원료:</b><br/>{row['matched_ingredient']}</p>
-                            </div>
-                            <div>
-                                <a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
-                            </div>
-                        </div>
-                        """), unsafe_allow_html=True)
+                        st.markdown(f"""<div class="top-product-card">
+<div>
+<img src="{img_src}" class="product-img-box" alt="제품 이미지"/>
+<span class="badge-yellow">🎯 고민: {g_name}</span>
+<span class="badge-green">{row['platform'].upper()}</span>
+<span class="badge-price">💰 1일 약 {int(row['daily_cost']):,}원</span>
+<h4 style="margin-top:0.5rem; color:#1B4D3E; font-size:1.05rem; min-height: 2.6rem;">{row['product_name']}</h4>
+<p style="margin-bottom:0.2rem; color:#444; font-size:0.9rem;"><b>브랜드:</b> {row['brand']}</p>
+<p style="margin-bottom:0.2rem; color:#1B4D3E; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
+<p style="margin-bottom:0.4rem; color:#333; font-size:0.85rem;"><b>⭐ 평점:</b> {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
+<hr style="margin:0.5rem 0; border-color:#E6DFD3;"/>
+<p style="font-size:0.85rem; color:#333;"><b>🧪 주요 원료:</b><br/>{row['matched_ingredient']}</p>
+</div>
+<div>
+<a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
+</div>
+</div>""", unsafe_allow_html=True)
                         
                         if is_in_cart:
                             if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v10"):
@@ -1093,9 +1053,7 @@ def main():
                     st.markdown(f"**{r['product_name']}** | <span style='color:#1B4D3E; font-weight:700;'>{r['brand']}</span>", unsafe_allow_html=True)
                     st.caption(f"가격: {int(r['price']):,}원 (1일 약 {int(r['daily_cost']):,}원) | 주요 성분: {r['matched_ingredient']} | 판매처: {plat_name}")
                 with cc3:
-                    st.markdown(f"""
-                    <a href="{p_url}" target="_blank" class="cart-buy-btn">🛒 {plat_name} 구매</a>
-                    """, unsafe_allow_html=True)
+                    st.markdown(f"""<a href="{p_url}" target="_blank" class="cart-buy-btn">🛒 {plat_name} 구매</a>""", unsafe_allow_html=True)
                     
                     st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
                     
@@ -1111,24 +1069,20 @@ def main():
         g1, g2 = st.columns(2)
         with g1:
             st.markdown("#### 🟢 최고 시너지 찰떡 궁합 BEST 4")
-            st.markdown(textwrap.dedent("""
-            <div class="custom-card" style="border-left: 5px solid #16a34a;">
-                <h5 style="color:#16a34a; margin-bottom:0.3rem;">1. 오메가3 + 비타민 E / 루테인</h5>
-                <p style="font-size:0.95rem; color:#374151;">지용성 영양제인 루테인은 오메가3의 불포화지방산과 함께 섭취 시 체내 흡수율이 대폭 증가하며, 비타민E는 오메가3의 산화를 막아줍니다.</p>
-            </div>
-            <div class="custom-card" style="border-left: 5px solid #16a34a;">
-                <h5 style="color:#16a34a; margin-bottom:0.3rem;">2. 칼슘 + 비타민 D + 마그네슘 (칼마디)</h5>
-                <p style="font-size:0.95rem; color:#374151;">비타민D가 장에서 칼슘의 흡수를 돕고, 마그네슘은 흡수된 칼슘이 뼈로 잘 이동하도록 촉진하는 대표 상호보완 조합입니다.</p>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="custom-card" style="border-left: 5px solid #16a34a;">
+<h5 style="color:#16a34a; margin-bottom:0.3rem;">1. 오메가3 + 비타민 E / 루테인</h5>
+<p style="font-size:0.95rem; color:#374151;">지용성 영양제인 루테인은 오메가3의 불포화지방산과 함께 섭취 시 체내 흡수율이 대폭 증가하며, 비타민E는 오메가3의 산화를 막아줍니다.</p>
+</div>
+<div class="custom-card" style="border-left: 5px solid #16a34a;">
+<h5 style="color:#16a34a; margin-bottom:0.3rem;">2. 칼슘 + 비타민 D + 마그네슘 (칼마디)</h5>
+<p style="font-size:0.95rem; color:#374151;">비타민D가 장에서 칼슘의 흡수를 돕고, 마그네슘은 흡수된 칼슘이 뼈로 잘 이동하도록 촉진하는 대표 상호보완 조합입니다.</p>
+</div>""", unsafe_allow_html=True)
         with g2:
             st.markdown("#### 🔴 동시 복용 금기 / 주의 섭취 조합")
-            st.markdown(textwrap.dedent("""
-            <div class="custom-card" style="border-left: 5px solid #dc2626;">
-                <h5 style="color:#dc2626; margin-bottom:0.3rem;">1. 칼슘 vs 철분</h5>
-                <p style="font-size:0.95rem; color:#374151;">두 성분은 체내 이동 통로(흡수 수용체)를 공유하므로 동시 복용 시 서로의 흡수를 섭취 방해합니다. (최소 2시간 차이 권장)</p>
-            </div>
-            """), unsafe_allow_html=True)
+            st.markdown("""<div class="custom-card" style="border-left: 5px solid #dc2626;">
+<h5 style="color:#dc2626; margin-bottom:0.3rem;">1. 칼슘 vs 철분</h5>
+<p style="font-size:0.95rem; color:#374151;">두 성분은 체내 이동 통로(흡수 수용체)를 공유하므로 동시 복용 시 서로의 흡수를 섭취 방해합니다. (최소 2시간 차이 권장)</p>
+</div>""", unsafe_allow_html=True)
 
     # ==========================================
     # PAGE 7: 영양제 검색 & 스펙 비교
@@ -1174,19 +1128,17 @@ def main():
                         is_in_cart = pid in st.session_state.cart
                         
                         with comp_cols[idx]:
-                            st.markdown(textwrap.dedent(f"""
-                            <div class="custom-card" style="text-align:center;">
-                                <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
-                                <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#1B4D3E;">{row['product_name']}</h5>
-                                <p style="margin-bottom:0.3rem; font-size:0.9rem; color:#444;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
-                                <p style="margin-bottom:0.3rem; color:#1B4D3E; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
-                                <p style="margin-bottom:0.3rem; color:#6B21A8; font-size:0.95rem;"><b>💰 1일 섭취비용:</b> 약 {int(row['daily_cost']):,}원/일</p>
-                                <p style="margin-bottom:0.3rem; color:#333;"><b>평점:</b> ⭐ {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
-                                <p style="margin-bottom:0.3rem; color:#333;"><b>주요 성분:</b> {row['matched_ingredient']}</p>
-                                <p style="margin-bottom:0.5rem; color:#333;"><b>제형:</b> {row['form_type']}</p>
-                                <a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
-                            </div>
-                            """), unsafe_allow_html=True)
+                            st.markdown(f"""<div class="custom-card" style="text-align:center;">
+<img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
+<h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#1B4D3E;">{row['product_name']}</h5>
+<p style="margin-bottom:0.3rem; font-size:0.9rem; color:#444;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
+<p style="margin-bottom:0.3rem; color:#1B4D3E; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
+<p style="margin-bottom:0.3rem; color:#6B21A8; font-size:0.95rem;"><b>💰 1일 섭취비용:</b> 약 {int(row['daily_cost']):,}원/일</p>
+<p style="margin-bottom:0.3rem; color:#333;"><b>평점:</b> ⭐ {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
+<p style="margin-bottom:0.3rem; color:#333;"><b>주요 성분:</b> {row['matched_ingredient']}</p>
+<p style="margin-bottom:0.5rem; color:#333;"><b>제형:</b> {row['form_type']}</p>
+<a href="{p_url}" target="_blank" class="buy-btn">🛒 {row['platform'].upper()}에서 구매하기</a>
+</div>""", unsafe_allow_html=True)
                             
                             if is_in_cart:
                                 if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v10"):
