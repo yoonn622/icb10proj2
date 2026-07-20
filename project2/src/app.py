@@ -1,8 +1,11 @@
 """
 뉴트리핏(NutriFit) 초개인화 영양제 추천 및 트렌드 대시보드 애플리케이션입니다.
-- [기능 추가] 약관 동의 영역 '☑️ 전체 동의' 체크박스 기능 구현 및 개별 약관 체크 상태 실시간 상호 동기화
-- [가독성 개선] 다크모드/라이트모드 호환 BMI 수치 박스 및 전체 텍스트 명도/가독성 대폭 향상
-- [기능 추가] 내 영양제 보관함 목록 및 상단 바에 원클릭 바로 구매(쿠팡/올리브영/아이허브) 링크 연동
+
+주요 기능 및 디자인 업데이트:
+1. 인트로 페이지 도입: '내가 찾던 영양제', '나만을 위한 맞춤 영양제를 찾아드려요!' 헤드카피와 감각적인 알약 비주얼 배치
+2. 사용자 친화적 카테고리 이동 UX (인트로 CTA 및 상단 탭/네비게이션 연동)
+3. 아이보리(#FAF8F5) 배경, 산뜻한 녹색(#1B4D3E) 폰트, 노란색(#F59E0B) 포인트 컬러를 반영한 고감도 UI 디자인
+4. 스마트 문진/AI 진단, 카테고리/연령대별 인기 영양제, 내 영양제 보관함 중복 분석, 시너지 가이드, 스펙 비교 지원
 """
 
 import os
@@ -16,142 +19,207 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ==========================================
-# 0. 페이지 기본 설정 및 커스텀 CSS (Clean Green & White + High Contrast)
+# 0. 페이지 기본 설정 및 커스텀 CSS (Ivory & Deep Green & Point Yellow)
 # ==========================================
 st.set_page_config(
-    page_title="NutriFit | AI 초개인화 영양제 큐레이션",
-    page_icon="🧬",
+    page_title="NutriFit | 나만을 위한 맞춤 영양제 큐레이션",
+    page_icon="💊",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 CUSTOM_CSS = """
 <style>
-    .main {
-        background-color: #f8faf9;
+    /* 전체 앱 주요 배경: 아이보리 톤 (#FAF8F5) */
+    .stApp {
+        background-color: #FAF8F5 !important;
         font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     }
-    .header-container {
-        background: linear-gradient(135deg, #0e462d 0%, #1b7a4e 100%);
-        color: white;
-        padding: 2.2rem 2rem;
-        border-radius: 16px;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(14, 70, 45, 0.15);
-    }
-    .header-container h1 {
-        font-weight: 800;
-        font-size: 2.3rem;
-        margin-bottom: 0.5rem;
-        color: #ffffff !important;
-        letter-spacing: -0.5px;
-    }
-    .header-container p {
-        font-size: 1.1rem;
-        color: #f0fdf4 !important;
-        opacity: 0.95;
-        margin: 0;
+
+    /* 기본 폰트 컬러: 선명하고 깊이 있는 딥 그린 (#1B4D3E) */
+    h1, h2, h3, h4, h5, h6, p, label, span, div {
+        color: #1B4D3E;
     }
     
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        justify-content: center;
-        border-bottom: 2px solid #e1e9e5;
-        margin-bottom: 1.5rem;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 52px;
-        white-space: nowrap !important;
-        background-color: #ffffff;
-        border-radius: 12px 12px 0px 0px;
-        padding: 10px 20px !important;
-        font-weight: 700 !important;
-        font-size: 1.02rem !important;
-        border: 1px solid #d5e3dc;
-        color: #374151 !important;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #1b7a4e !important;
-        color: #ffffff !important;
-        border-color: #1b7a4e !important;
-        box-shadow: 0 4px 12px rgba(27, 122, 78, 0.2);
+    .stMarkdown, .stText {
+        color: #1B4D3E !important;
     }
 
+    /* 메인 인트로 히어로 섹션 스타일링 */
+    .intro-hero-card {
+        background: linear-gradient(145deg, #FFFDF8 0%, #F5F0E6 100%);
+        border: 2px solid #E6DFD3;
+        border-radius: 28px;
+        padding: 3.5rem 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 12px 35px rgba(27, 77, 62, 0.06);
+        position: relative;
+    }
+
+    /* 노란색 포인트 소제목 배지 */
+    .sub-badge {
+        display: inline-block;
+        background-color: #FEF08A;
+        color: #854D0E !important;
+        font-weight: 800;
+        font-size: 1.05rem;
+        padding: 0.45rem 1.4rem;
+        border-radius: 50px;
+        margin-bottom: 1.2rem;
+        border: 1px solid #FDE047;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);
+        letter-spacing: -0.3px;
+    }
+
+    /* 메인 헤드카피 스타일 */
+    .head-title {
+        font-size: 2.6rem;
+        font-weight: 900;
+        color: #1B4D3E !important;
+        letter-spacing: -1px;
+        line-height: 1.35;
+        margin-bottom: 1rem;
+    }
+
+    .head-desc {
+        font-size: 1.15rem;
+        color: #2D6A4F !important;
+        font-weight: 500;
+        margin-bottom: 2rem;
+    }
+
+    /* 그래픽 & 알약 아카이빙 비주얼 컨테이너 */
+    .pill-visual-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin: 2.2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .pill-card-item {
+        background: #FFFFFF;
+        border: 1px solid #E2D9C8;
+        border-radius: 20px;
+        padding: 1.2rem 1.8rem;
+        box-shadow: 0 6px 18px rgba(27, 77, 62, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: transform 0.2s ease;
+    }
+
+    .pill-card-item:hover {
+        transform: translateY(-4px);
+    }
+
+    .pill-icon {
+        font-size: 2.2rem;
+    }
+
+    .pill-text-title {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #1B4D3E !important;
+        margin: 0;
+    }
+
+    .pill-text-sub {
+        font-size: 0.88rem;
+        color: #52796F !important;
+        margin: 0;
+    }
+
+    /* 카드 박스 스타일링 (아이보리/화이트) */
     .custom-card {
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-        border-radius: 14px;
-        padding: 1.5rem;
+        background-color: #FFFFFF !important;
+        color: #1B4D3E !important;
+        border-radius: 20px;
+        padding: 1.6rem;
         margin-bottom: 1.2rem;
-        border: 1px solid #e1e9e5;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: 1px solid #E6DFD3;
+        box-shadow: 0 4px 16px rgba(27, 77, 62, 0.04);
     }
-    
-    .bmi-box {
-        background-color: #ffffff !important;
-        color: #111827 !important;
-        border: 2px solid #1b7a4e !important;
-        border-left: 6px solid #1b7a4e !important;
-        padding: 1.2rem 1.4rem;
-        border-radius: 12px;
-        margin-top: 0.5rem;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
-    
-    .badge-green {
-        background-color: #e8f5e9;
-        color: #1b7a4e !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
-    .badge-goal {
-        background-color: #fef3c7;
-        color: #92400e !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
-    .badge-platform {
-        background-color: #e0f2fe;
-        color: #0369a1 !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
-    .badge-price {
-        background-color: #f3e8ff;
-        color: #6b21a8 !important;
-        padding: 0.35rem 0.85rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-block;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-    }
-    
-    .top-product-card {
-        background: #ffffff !important;
-        color: #1f2937 !important;
-        border: 2px solid #1b7a4e;
+
+    /* 상단 네비게이션 헤더 */
+    .nav-header {
+        background-color: #1B4D3E;
+        color: #FFFFFF !important;
+        padding: 1rem 1.8rem;
         border-radius: 16px;
-        padding: 1.2rem;
+        margin-bottom: 1.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 18px rgba(27, 77, 62, 0.15);
+    }
+
+    .nav-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #FFFFFF !important;
+        margin: 0;
+    }
+
+    /* BMI 결과 박스 */
+    .bmi-box {
+        background-color: #FFFDF8 !important;
+        color: #1B4D3E !important;
+        border: 2px solid #1B4D3E !important;
+        border-left: 6px solid #F59E0B !important;
+        padding: 1.2rem 1.4rem;
+        border-radius: 16px;
+        margin-top: 0.5rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    }
+
+    /* 배지 컬러 가이드 (포인트 노랑 및 테마) */
+    .badge-yellow {
+        background-color: #FEF08A;
+        color: #854D0E !important;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .badge-green {
+        background-color: #E8F5E9;
+        color: #1B4D3E !important;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .badge-price {
+        background-color: #F3E8FF;
+        color: #6B21A8 !important;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .top-product-card {
+        background: #FFFFFF !important;
+        color: #1B4D3E !important;
+        border: 2px solid #1B4D3E;
+        border-radius: 20px;
+        padding: 1.3rem;
         margin-bottom: 1.2rem;
-        box-shadow: 0 6px 16px rgba(27, 122, 78, 0.12);
+        box-shadow: 0 8px 20px rgba(27, 77, 62, 0.08);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -162,50 +230,71 @@ CUSTOM_CSS = """
         width: 100%;
         height: 170px;
         object-fit: contain;
-        border-radius: 12px;
-        background-color: #ffffff;
+        border-radius: 14px;
+        background-color: #FAF8F5;
         padding: 0.5rem;
         margin-bottom: 0.8rem;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #E6DFD3;
     }
 
     .buy-btn {
         display: block;
         width: 100%;
         text-align: center;
-        background-color: #1b7a4e;
-        color: #ffffff !important;
+        background-color: #1B4D3E;
+        color: #FFFFFF !important;
         font-weight: 700;
-        padding: 0.65rem 1rem;
-        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        border-radius: 12px;
         text-decoration: none;
         margin-top: 0.4rem;
         margin-bottom: 0.4rem;
         transition: background-color 0.2s ease;
     }
     .buy-btn:hover {
-        background-color: #0e462d;
-        color: #ffffff !important;
+        background-color: #0E3429;
+        color: #FFFFFF !important;
         text-decoration: none;
     }
-    
+
     .cart-buy-btn {
         display: inline-block;
         width: 100%;
         text-align: center;
-        background-color: #0284c7;
-        color: #ffffff !important;
-        font-weight: 700;
-        padding: 0.5rem 0.8rem;
-        border-radius: 8px;
+        background-color: #F59E0B;
+        color: #FFFFFF !important;
+        font-weight: 800;
+        padding: 0.55rem 0.8rem;
+        border-radius: 10px;
         text-decoration: none;
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         transition: background-color 0.2s ease;
     }
     .cart-buy-btn:hover {
-        background-color: #0369a1;
-        color: #ffffff !important;
+        background-color: #D97706;
+        color: #FFFFFF !important;
         text-decoration: none;
+    }
+
+    /* Streamlit 기본 버튼 커스터마이징 */
+    .stButton > button {
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        border: 1px solid #E6DFD3 !important;
+        background-color: #FFFFFF !important;
+        color: #1B4D3E !important;
+    }
+
+    .stButton > button[kind="primary"] {
+        background-color: #F59E0B !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3) !important;
+    }
+    
+    .stButton > button[kind="primary"]:hover {
+        background-color: #D97706 !important;
+        color: #FFFFFF !important;
     }
 </style>
 """
@@ -216,6 +305,9 @@ DEFAULT_IMG = "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto
 # ==========================================
 # 1. 세션 스테이트 & 약관 전체 동의 콜백
 # ==========================================
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "intro"  # 🌟 기본 시작 페이지: 인트로 페이지
+
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
@@ -369,27 +461,46 @@ def load_data():
 
 
 # ==========================================
-# 3. 메인 대시보드 레이아웃
+# 3. 메인 대시보드 레이아웃 & 페이지 전환
 # ==========================================
 def main():
-    st.markdown("""
-        <div class="header-container">
-            <h1>🧬 NutriFit 초개인화 AI 영양제 큐레이션</h1>
-            <p>공공데이터(식약처/DUR) 기반 스마트 안전 진단 & 맞춤형 영양제 추천 시스템</p>
-        </div>
-    """, unsafe_allow_html=True)
-    
     df = load_data()
     if df.empty:
         return
 
-    # 🛒 상단 스마트 보관함 요약 바 (Cart Summary)
+    # 🌟 상단 탭 / 카테고리 네비게이션 바
+    pages = {
+        "intro": "🏠 인트로 홈",
+        "diagnosis": "🧬 스마트 문진 & AI 진단",
+        "category": "🏷️ 카테고리별 인기 영양제",
+        "age": "🎂 연령대별 인기 영양제",
+        "cart": f"🛒 내 보관함 ({len(st.session_state.cart)}개)",
+        "synergy": "💊 영양제 시너지 가이드",
+        "search": "🔍 영양제 검색 & 비교"
+    }
+
+    # 상단 글로벌 브랜드 라인 & Navigation
+    nav_cols = st.columns([2.5, 1, 1, 1, 1, 1, 1])
+    with nav_cols[0]:
+        st.markdown("<h3 style='margin:0; padding-top:0.2rem; color:#1B4D3E; font-weight:900;'>💊 NutriFit <span style='font-size:0.9rem; font-weight:500; color:#52796F;'>| 초개인화 맞춤 영양제</span></h3>", unsafe_allow_html=True)
+    
+    page_keys = list(pages.keys())
+    for idx, p_key in enumerate(page_keys):
+        with nav_cols[idx]:
+            is_active = (st.session_state.current_page == p_key)
+            btn_type = "primary" if is_active else "secondary"
+            if st.button(pages[p_key], key=f"top_nav_{p_key}", type=btn_type, use_container_width=True):
+                st.session_state.current_page = p_key
+                st.rerun()
+
+    st.markdown("<hr style='margin:0.8rem 0 1.5rem 0; border-color:#E6DFD3;'/>", unsafe_allow_html=True)
+
+    # 🛒 상단 스마트 보관함 미니 요약 바 (보관함에 담긴 항목이 있을 경우)
     cart_count = len(st.session_state.cart)
-    if cart_count > 0:
-        with st.expander(f"🛒 내 영양제 보관함 ({cart_count}개 담김) - 클릭하여 합산 비용 및 구매 링크 보기", expanded=True):
+    if cart_count > 0 and st.session_state.current_page != "cart":
+        with st.expander(f"🛒 내 영양제 보관함 ({cart_count}개 담김) - 합산 비용 및 구매 링크 보기", expanded=False):
             cart_rows = list(st.session_state.cart.values())
             cart_df = pd.DataFrame(cart_rows)
-            
             total_price = cart_df['price'].sum()
             total_daily = cart_df['daily_cost'].sum()
             
@@ -397,45 +508,113 @@ def main():
             with mc1: st.metric("💰 담은 영양제 총 금액", f"{int(total_price):,}원")
             with mc2: st.metric("🗓️ 1일 총 합산 복용 비용", f"약 {int(total_daily):,}원 / 일")
             with mc3:
-                if st.button("🧹 보관함 전체 비우기", type="secondary", key="clear_top_cart_v10_src"):
-                    clear_cart()
+                if st.button("🛒 보관함 페이지로 이동", type="primary", key="go_to_cart_from_top"):
+                    st.session_state.current_page = "cart"
                     st.rerun()
 
-            ing_counts = cart_df['matched_ingredient'].value_counts()
-            duplicated_ings = ing_counts[ing_counts > 1]
-            if not duplicated_ings.empty:
-                st.warning(f"⚠️ **성분 중복 과다 섭취 주의**: 현재 보관함에 다음 성분이 2개 이상 중복 포함되어 있습니다.")
-                for ing_name, cnt in duplicated_ings.items():
-                    if ing_name != "미분류 일반식품군":
-                        st.write(f"• **{ing_name}** ({cnt}개 제품 중복) - 동일 성분 중복 복용 시 1일 권장 섭취량 초과 가능성이 있으니 함량을 확인하세요.")
-            else:
-                st.success("✅ 현재 담으신 영양제들의 주요 기능성 원료 중복 및 과다 섭취 위험이 없습니다!")
-
-            display_cart_df = cart_df.copy()
-            display_cart_df['구매_링크'] = display_cart_df.apply(lambda r: get_purchase_url(r['platform'], r['product_name']), axis=1)
+    # ==========================================
+    # PAGE 1: 인트로 페이지 (Intro Page)
+    # ==========================================
+    if st.session_state.current_page == "intro":
+        st.markdown("""
+        <div class="intro-hero-card">
+            <span class="sub-badge">💊 내가 찾던 영양제</span>
+            <h1 class="head-title">나만을 위한 맞춤 영양제를<br/>찾아드려요!</h1>
+            <p class="head-desc">공공데이터(식약처/DUR) 기반 스마트 안전 진단 & 이커머스 랭킹 큐레이션</p>
             
-            st.markdown("##### 🛒 담은 영양제 목록 및 구매 링크")
-            st.dataframe(
-                display_cart_df[['brand', 'product_name', 'price', 'daily_cost', 'matched_ingredient', 'platform', '구매_링크']].reset_index(drop=True),
-                column_config={
-                    "구매_링크": st.column_config.LinkColumn("🛒 구매 링크", help="클릭 시 구매 페이지로 이동", display_text="구매하러 가기")
-                },
-                use_container_width=True
-            )
+            <div class="pill-visual-box">
+                <div class="pill-card-item">
+                    <span class="pill-icon">💊</span>
+                    <div style="text-align:left;">
+                        <p class="pill-text-title">맞춤 영양성분 큐레이션</p>
+                        <p class="pill-text-sub">내 성별·연령·건강고민 최적화</p>
+                    </div>
+                </div>
+                <div class="pill-card-item">
+                    <span class="pill-icon">🛡️</span>
+                    <div style="text-align:left;">
+                        <p class="pill-text-title">의료 안전성 자동 검증</p>
+                        <p class="pill-text-sub">흡연·질환·알레르기 섭취 필터</p>
+                    </div>
+                </div>
+                <div class="pill-card-item">
+                    <span class="pill-icon">💰</span>
+                    <div style="text-align:left;">
+                        <p class="pill-text-title">1일 섭취 비용 비교</p>
+                        <p class="pill-text-sub">합리적 가격 & 보관함 분석</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "🧬 뉴트리핏 스마트 문진 및 AI 진단",
-        "🏷️ 카테고리별 인기 영양제",
-        "🎂 연령대별 인기 영양제",
-        "🛒 내 영양제 보관함 분석",
-        "💊 영양제 시너지 & 복용 타임 가이드",
-        "🔍 영양제 검색 & 스펙 비교"
-    ])
-    
+        # 메인 진단 시작 CTA 버튼 (중앙 화살표 및 큰 버튼)
+        st.markdown("<div style='text-align:center; margin-bottom:1rem;'><span style='font-size:2.2rem;'>🔽</span></div>", unsafe_allow_html=True)
+        
+        c_left, c_mid, c_right = st.columns([1, 2, 1])
+        with c_mid:
+            if st.button("✨ 나에게 필요한 영양제 확인하기 💊", type="primary", key="cta_start_diagnosis", use_container_width=True):
+                st.session_state.current_page = "diagnosis"
+                st.rerun()
+        
+        st.markdown("<br/><br/>", unsafe_allow_html=True)
+        
+        # 카테고리 퀵 둘러보기 카드 그리드
+        st.markdown("<h3 style='text-align:center; font-weight:800; color:#1B4D3E; margin-bottom:1.5rem;'>⚡ 원하는 카테고리로 빠르게 바로가기</h3>", unsafe_allow_html=True)
+        
+        q1, q2, q3, q4 = st.columns(4)
+        with q1:
+            st.markdown("""
+            <div class="custom-card" style="text-align:center; padding:1.4rem;">
+                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🧬</div>
+                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">스마트 문진 & AI 진단</h4>
+                <p style="font-size:0.88rem; color:#52796F;">개인 맞춤형 영양제 추천</p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("문진 시작하기", key="quick_btn_diag", use_container_width=True):
+                st.session_state.current_page = "diagnosis"
+                st.rerun()
+
+        with q2:
+            st.markdown("""
+            <div class="custom-card" style="text-align:center; padding:1.4rem;">
+                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🏷️</div>
+                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">카테고리별 인기 순위</h4>
+                <p style="font-size:0.88rem; color:#52796F;">원료별 이커머스 TOP 10</p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("카테고리 보기", key="quick_btn_cat", use_container_width=True):
+                st.session_state.current_page = "category"
+                st.rerun()
+
+        with q3:
+            st.markdown("""
+            <div class="custom-card" style="text-align:center; padding:1.4rem;">
+                <div style="font-size:2.5rem; margin-bottom:0.5rem;">🎂</div>
+                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">연령대별 인기 영양제</h4>
+                <p style="font-size:0.88rem; color:#52796F;">20대~60대 맞춤 추천</p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("연령대별 보기", key="quick_btn_age", use_container_width=True):
+                st.session_state.current_page = "age"
+                st.rerun()
+
+        with q4:
+            st.markdown("""
+            <div class="custom-card" style="text-align:center; padding:1.4rem;">
+                <div style="font-size:2.5rem; margin-bottom:0.5rem;">💊</div>
+                <h4 style="font-weight:800; font-size:1.15rem; margin-bottom:0.4rem;">시너지 & 타임 가이드</h4>
+                <p style="font-size:0.88rem; color:#52796F;">최고 조합 & 금기 조합</p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("가이드 확인하기", key="quick_btn_syn", use_container_width=True):
+                st.session_state.current_page = "synergy"
+                st.rerun()
+
     # ==========================================
-    # [탭 1] 스마트 문진 및 AI 진단 (전체 동의 체크박스 추가)
+    # PAGE 2: 뉴트리핏 스마트 문진 및 AI 진단
     # ==========================================
-    with tab1:
+    elif st.session_state.current_page == "diagnosis":
         st.subheader("📋 개인 맞춤형 영양 문진 및 의료 안전 필터 진단")
         st.warning(
             "⚠️ **서비스 안내 및 면책 공지**: 본 서비스는 의학적 치료나 질병 진단을 대체하는 의료 행위가 아니며, "
@@ -445,7 +624,7 @@ def main():
         
         st.markdown("##### 🔒 약관 동의 및 수집 안내")
         
-        # 🌟 '☑️ 전체 동의' 원클릭 체크박스 추가
+        # 🌟 '☑️ 전체 동의' 원클릭 체크박스
         st.checkbox(
             "☑️ **[전체 동의]** 서비스 이용약관, 연령 확인 및 개인정보/민감정보 수집·이용에 모두 동의합니다.",
             key="agree_all",
@@ -482,18 +661,18 @@ def main():
             st.markdown("### 👤 STEP 1. 기본 정보 (Demographics)")
             c1, c2, c3 = st.columns([1.1, 1, 1.2])
             with c1:
-                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v10_src")
+                gender = st.radio("1-1. 성별", ["남성", "여성", "응답하지 않음"], horizontal=True, key="gender_v10")
                 male_concerns = []
                 female_status = "해당 없음"
                 if gender == "남성":
-                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v10_src")
+                    male_concerns = st.multiselect("남성 특화 추가 고민 선택", ["전립선 건강", "남성형 탈모 고민", "근육량 유지/운동"], key="male_concerns_v10")
                 elif gender == "여성":
-                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v10_src")
+                    female_status = st.radio("여성 생애주기/상태 선택", ["해당 없음", "임신 준비 중", "임신 중", "수유 중", "폐경기"], key="female_status_v10")
             with c2:
                 age_group = st.selectbox("1-2. 연령대", ["20대 미만", "20대", "30대", "40대", "50대 이상"], index=2)
             with c3:
-                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v10_src")
-                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v10_src")
+                height = st.number_input("1-3. 키 (cm)", min_value=100.0, max_value=230.0, value=160.0, step=0.5, key="height_v10")
+                weight = st.number_input("몸무게 (kg)", min_value=30.0, max_value=200.0, value=50.0, step=0.5, key="weight_v10")
                 
                 height_m = height / 100.0
                 bmi = weight / (height_m * height_m)
@@ -505,12 +684,12 @@ def main():
                 st.markdown(f"""
                 <div class="bmi-box">
                     <div style="margin-bottom:0.3rem;">
-                        <span style="color:#111827; font-size:1.05rem; font-weight:800;">📐 실시간 계산 BMI 지수:</span> 
-                        <span style="color:#0e462d; font-size:1.2rem; font-weight:800; background-color:#e8f5e9; padding:0.1rem 0.5rem; border-radius:6px;">{bmi:.1f} kg/m²</span>
+                        <span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📐 실시간 계산 BMI 지수:</span> 
+                        <span style="color:#1B4D3E; font-size:1.2rem; font-weight:800; background-color:#FEF08A; padding:0.1rem 0.5rem; border-radius:6px;">{bmi:.1f} kg/m²</span>
                     </div>
                     <div>
-                        <span style="color:#111827; font-size:1.05rem; font-weight:800;">📊 상태 진단:</span> 
-                        <span style="color:{bmi_color}; font-size:1.2rem; font-weight:800; background-color:#f9fafb; padding:0.1rem 0.5rem; border-radius:6px; border:1px solid #e5e7eb;">{bmi_status}</span>
+                        <span style="color:#1B4D3E; font-size:1.05rem; font-weight:800;">📊 상태 진단:</span> 
+                        <span style="color:{bmi_color}; font-size:1.2rem; font-weight:800; background-color:#FFFDF8; padding:0.1rem 0.5rem; border-radius:6px; border:1px solid #E6DFD3;">{bmi_status}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -695,14 +874,14 @@ def main():
                         <div class="top-product-card">
                             <div>
                                 <img src="{img_src}" class="product-img-box" alt="제품 이미지"/>
-                                <span class="badge-goal">🎯 고민: {g_name}</span>
-                                <span class="badge-platform">{row['platform'].upper()}</span>
+                                <span class="badge-yellow">🎯 고민: {g_name}</span>
+                                <span class="badge-green">{row['platform'].upper()}</span>
                                 <span class="badge-price">💰 1일 약 {int(row['daily_cost']):,}원</span>
-                                <h4 style="margin-top:0.5rem; color:#0e462d; font-size:1.05rem; min-height: 2.6rem;">{row['product_name']}</h4>
+                                <h4 style="margin-top:0.5rem; color:#1B4D3E; font-size:1.05rem; min-height: 2.6rem;">{row['product_name']}</h4>
                                 <p style="margin-bottom:0.2rem; color:#444; font-size:0.9rem;"><b>브랜드:</b> {row['brand']}</p>
-                                <p style="margin-bottom:0.2rem; color:#1b7a4e; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
+                                <p style="margin-bottom:0.2rem; color:#1B4D3E; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
                                 <p style="margin-bottom:0.4rem; color:#333; font-size:0.85rem;"><b>⭐ 평점:</b> {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
-                                <hr style="margin:0.5rem 0; border-color:#e1e9e5;"/>
+                                <hr style="margin:0.5rem 0; border-color:#E6DFD3;"/>
                                 <p style="font-size:0.85rem; color:#333;"><b>🧪 주요 원료:</b><br/>{row['matched_ingredient']}</p>
                             </div>
                             <div>
@@ -712,18 +891,18 @@ def main():
                         """, unsafe_allow_html=True)
                         
                         if is_in_cart:
-                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v10_src"):
+                            if st.button("❌ 보관함에서 삭제", key=f"del_rec_{pid}_{idx}_v10"):
                                 remove_from_cart(pid)
                                 st.rerun()
                         else:
-                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v10_src", type="primary"):
+                            if st.button("➕ 내 보관함에 담기", key=f"add_rec_{pid}_{idx}_v10", type="primary"):
                                 add_to_cart(row)
                                 st.rerun()
 
     # ==========================================
-    # [탭 2] 카테고리별 인기 영양제
+    # PAGE 3: 카테고리별 인기 영양제
     # ==========================================
-    with tab2:
+    elif st.session_state.current_page == "category":
         st.subheader("🏷️ 카테고리별 인기 영양제 & 원클릭 퀵 알약 칩")
         st.caption("원하는 퀵 칩 태그를 클릭하여 원료별 인기 랭킹을 즉시 조회하세요.")
         
@@ -742,7 +921,7 @@ def main():
         selected_cat_pill = None
         for i, (chip_label, target_cat) in enumerate(quick_chips):
             with pill_cols[i]:
-                if st.button(chip_label, key=f"chip_btn_{i}_v10_src", use_container_width=True):
+                if st.button(chip_label, key=f"chip_btn_{i}_v10", use_container_width=True):
                     selected_cat_pill = target_cat
 
         available_categories = [
@@ -760,7 +939,7 @@ def main():
         if selected_cat_pill and selected_cat_pill in available_categories:
             default_idx = available_categories.index(selected_cat_pill)
             
-        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v10_src")
+        selected_cat = st.selectbox("🎯 상세 영양 성분 카테고리를 선택하세요", available_categories, index=default_idx, key="cat_select_v10")
         
         df_cat = df.copy() if selected_cat == "전체 카테고리 보기" else df[df['matched_ingredient'] == selected_cat]
         df_cat_top10 = df_cat.sort_values(by='popularity_score', ascending=False).head(10)
@@ -786,11 +965,11 @@ def main():
                 st.dataframe(renamed_df.style.format({'가격(원)': '{:,.0f}', '1일 비용(원)': '{:,.0f}', '평점': '{:.1f}', '리뷰 수': '{:,.0f}'}), use_container_width=True, height=430)
 
     # ==========================================
-    # [탭 3] 연령대별 인기 영양제
+    # PAGE 4: 연령대별 인기 영양제
     # ==========================================
-    with tab3:
+    elif st.session_state.current_page == "age":
         st.subheader("🎂 연령대별 인기 영양제")
-        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v10_src")
+        selected_age = st.radio("조회할 연령대를 선택하세요", ["20대", "30대", "40대", "50대", "60대 이상"], horizontal=True, key="age_v10")
         age_weights = {
             "20대": ["비타민 B군·비오틴(에너지·활력)", "프로바이오틱스(유산균/장 건강)"],
             "30대": ["비타민 B군·비오틴(에너지·활력)", "rTG 오메가-3(혈관·혈행)", "마그네슘(신경·근육)"],
@@ -806,9 +985,9 @@ def main():
         st.dataframe(df_age_top10[['brand', 'product_name', 'matched_ingredient', 'price', 'daily_cost', 'platform']].reset_index(drop=True), use_container_width=True)
 
     # ==========================================
-    # [탭 4] 내 영양제 보관함 분석
+    # PAGE 5: 내 영양제 보관함 분석
     # ==========================================
-    with tab4:
+    elif st.session_state.current_page == "cart":
         st.subheader("🛒 내 영양제 보관함 & 성분 중복 과다 섭취 분석")
         cart_count = len(st.session_state.cart)
         if cart_count == 0:
@@ -845,7 +1024,7 @@ def main():
                 with cc1:
                     st.image(img_src, width=85)
                 with cc2:
-                    st.markdown(f"**{r['product_name']}** | <span style='color:#0369a1; font-weight:700;'>{r['brand']}</span>", unsafe_allow_html=True)
+                    st.markdown(f"**{r['product_name']}** | <span style='color:#1B4D3E; font-weight:700;'>{r['brand']}</span>", unsafe_allow_html=True)
                     st.caption(f"가격: {int(r['price']):,}원 (1일 약 {int(r['daily_cost']):,}원) | 주요 성분: {r['matched_ingredient']} | 판매처: {plat_name}")
                 with cc3:
                     st.markdown(f"""
@@ -854,14 +1033,14 @@ def main():
                     
                     st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
                     
-                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v10_src", use_container_width=True):
+                    if st.button("❌ 삭제", key=f"cart_page_del_{pid}_v10", use_container_width=True):
                         remove_from_cart(pid)
                         st.rerun()
 
     # ==========================================
-    # [탭 5] 영양제 시너지 & 복용 타임 가이드
+    # PAGE 6: 영양제 시너지 & 복용 타임 가이드
     # ==========================================
-    with tab5:
+    elif st.session_state.current_page == "synergy":
         st.subheader("💊 영양제 복용 시너지 조합 및 섭취 골든타임 가이드")
         g1, g2 = st.columns(2)
         with g1:
@@ -886,13 +1065,13 @@ def main():
             """, unsafe_allow_html=True)
 
     # ==========================================
-    # [탭 6] 영양제 검색 & 스펙 비교
+    # PAGE 7: 영양제 검색 & 스펙 비교
     # ==========================================
-    with tab6:
+    elif st.session_state.current_page == "search":
         st.subheader("🔍 전체 28,239개 영양제 다중 키워드 검색 & 1:1 스펙 비교")
         st.caption("공백 단위 멀티 키워드 검색 지원 (예: '종근당 비타민', '고려은단 C', '오쏘몰 7일분')")
         
-        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v10_src")
+        search_query = st.text_input("🔎 검색어 입력 (띄어쓰기로 여러 단어 검색 가능)", value="종근당 비타민", key="sq_v10")
         
         if search_query.strip():
             tokens = search_query.strip().split()
@@ -916,7 +1095,7 @@ def main():
                 st.divider()
                 st.markdown("#### ⚖️ 검색 결과 중 최대 3개 제품 1:1 스펙 & 실물 이미지 비교")
                 product_options = search_df['product_name'].unique()[:40]
-                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v10_src")
+                selected_products = st.multiselect("비교할 제품을 선택하세요 (최대 3개)", product_options, max_selections=3, key="comp_select_v10")
                 
                 if selected_products:
                     comp_df = search_df[search_df['product_name'].isin(selected_products)].drop_duplicates(subset=['product_name'])
@@ -932,10 +1111,10 @@ def main():
                             st.markdown(f"""
                             <div class="custom-card" style="text-align:center;">
                                 <img src="{img_src}" class="product-img-box" style="height:160px;" alt="제품 이미지"/>
-                                <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#0e462d;">{row['product_name']}</h5>
+                                <h5 style="margin-top:0.5rem; min-height: 2.4rem; color:#1B4D3E;">{row['product_name']}</h5>
                                 <p style="margin-bottom:0.3rem; font-size:0.9rem; color:#444;"><b>브랜드:</b> {row['brand']} | <b>출처:</b> {row['platform'].upper()}</p>
-                                <p style="margin-bottom:0.3rem; color:#1b7a4e; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
-                                <p style="margin-bottom:0.3rem; color:#6b21a8; font-size:0.95rem;"><b>💰 1일 섭취비용:</b> 약 {int(row['daily_cost']):,}원/일</p>
+                                <p style="margin-bottom:0.3rem; color:#1B4D3E; font-size:1.15rem;"><b>가격:</b> {int(row['price']):,}원</p>
+                                <p style="margin-bottom:0.3rem; color:#6B21A8; font-size:0.95rem;"><b>💰 1일 섭취비용:</b> 약 {int(row['daily_cost']):,}원/일</p>
                                 <p style="margin-bottom:0.3rem; color:#333;"><b>평점:</b> ⭐ {row['rating']}점 (리뷰 {int(row['review_count']):,}개)</p>
                                 <p style="margin-bottom:0.3rem; color:#333;"><b>주요 성분:</b> {row['matched_ingredient']}</p>
                                 <p style="margin-bottom:0.5rem; color:#333;"><b>제형:</b> {row['form_type']}</p>
@@ -944,11 +1123,11 @@ def main():
                             """, unsafe_allow_html=True)
                             
                             if is_in_cart:
-                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v10_src"):
+                                if st.button("❌ 보관함에서 삭제", key=f"del_comp_{pid}_{idx}_v10"):
                                     remove_from_cart(pid)
                                     st.rerun()
                             else:
-                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v10_src", type="primary"):
+                                if st.button("➕ 내 보관함에 담기", key=f"add_comp_{pid}_{idx}_v10", type="primary"):
                                     add_to_cart(row)
                                     st.rerun()
 
