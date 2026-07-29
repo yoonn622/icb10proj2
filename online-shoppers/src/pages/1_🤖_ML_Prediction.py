@@ -620,42 +620,42 @@ with tab3:
 # ----------------- 대시보드 공통 최하단: 비즈니스 인사이트 및 액션 플랜 -----------------
 st.markdown("---")
 st.markdown("## 💡 비즈니스 인사이트 및 액션 플랜 (Action Plan)")
-st.html("""
-<div class="commentary-box" style="border-left: 5px solid #ff9900; background-color: #ffffff; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 10px;">
-    <p style="font-size: 16px; margin-bottom: 25px; color: #4e73df; font-weight: 500;">
-        위의 피처 중요도(Feature Importance) 및 의사결정나무(Decision Tree) 분기 결과를 종합해보면, 방문자의 최종 구매(Revenue) 여부를 결정짓는 가장 핵심적인 요소들을 파악할 수 있습니다. 이를 바탕으로 다음과 같은 비즈니스 수익화(Monetization) 극대화 액션 플랜을 제안합니다.
-    </p>
-
-    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">1. 페이지 가치(PageValues) 극대화 및 장바구니 최적화</h3>
-    <p style="margin-bottom: 12px;">
-        머신러닝 분석 결과, <b>PageValues</b> (방문자가 구매 전에 머문 페이지의 평균 가치)가 구매 예측에 가장 압도적인 기여도를 가진 최중요 특성(Feature)으로 나타났습니다. 의사결정나무의 최상단 루트 노드 역시 해당 변수를 기준으로 고객을 1차 분류하며, 이 값이 임계점(약 6.02달러)을 넘을 때 높은 구매 확률을 보입니다.
-    </p>
-    <ul style="margin-bottom: 25px; padding-left: 20px;">
-        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 높은 가치를 지닌 페이지(장바구니, 결제 프로세스, 베스트셀러 상품 상세 페이지 등)로 고객 유입을 유도하는 구매 깔깔때기(Funnel) 여정을 전면 최적화해야 합니다. 특히 결제 단계에서의 허들과 심리적 마찰(Friction)을 줄이기 위해 원클릭 간편 결제 시스템을 강화하고 간소화해야 합니다. 또한 장바구니에 도달하였으나 미결제 상태인 유저들에게는 타임 세일 팝업이나 무료 배송 쿠폰을 <b>넛지(Nudge)</b> 형태로 실시간 제공하여 이탈 없이 최종 구매를 확정 짓도록 효과적으로 유도해야 합니다.</li>
-    </ul>
-
-    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">2. 이탈률(ExitRates) 분석 및 첫 페이지 체류(Retention) 방어 전략</h3>
-    <p style="margin-bottom: 12px;">
-        의사결정나무의 하위 분기 흐름을 보면, <b>ExitRates (종료율)</b>와 <b>BounceRates (반송률)</b> 수치가 높게 나타나는 고객 그룹은 수익 전환율이 급격히 저하되는 경향을 강하게 보입니다. 이는 사이트 진입 후 첫 브라우징 경험이 구매 여정에 심각한 병목을 유발하고 있음을 증명합니다.
-    </p>
-    <ul style="margin-bottom: 25px; padding-left: 20px;">
-        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 유입 직후 반송 및 이탈이 유독 많이 발생하는 '문제 랜딩 페이지'와 상세 설명 페이지를 트래킹하여 직관적이고 매끄러운 UI/UX로 전면 개편해야 합니다. 기술적으로 페이지 로딩 속도를 1초 단위로 최적화하고 단축시켜야 하며, 웹 화면 상단(Above the Fold) 영역에 고객의 시선을 단번에 사로잡는 매력적인 프로모션 배너와 명확한 CTA(Call to Action) 버튼을 배치하여 다음 추천 페이지로의 탐색 이동을 적극 유도해야 합니다.</li>
-    </ul>
-
-    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">3. 상품 집중 탐색(ProductRelated_Duration) 기반의 리타겟팅(Retargeting)</h3>
-    <p style="margin-bottom: 12px;">
-        단순 정보 조회성 페이지 브라우징에 비해, 상품 상세 탐색 페이지 방문 횟수(<b>ProductRelated</b>)와 해당 영역 체류 시간(<b>ProductRelated_Duration</b>)이 길고 깊어질수록 실제 최종 전환으로 이어질 확률이 매우 높습니다.
-    </p>
-    <ul style="margin-bottom: 25px; padding-left: 20px;">
-        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 특정 상품 상세 페이지에 오래 머물며 진지하게 탐색을 하였으나 결제하지 않고 이탈한 고객들은 구매 관여도가 높은 최상급의 <b>'고관여 잠재 고객'</b> 군입니다. 이 유저 풀(Pool)을 실시간 세그먼트화하여 맞춤형 리마인드 이메일 발송, 모바일 앱 푸시 알림, 구글 및 메타 등의 스폰서드 개인화 타겟 광고 캠페인을 자동 집행해야 합니다. 추가적으로 유저가 유심히 살펴본 상품의 실시간 연관 상품 및 교차 판매(Cross-Selling) 추천 기능을 고도화하여 재유입 시 구매를 자극해야 합니다.</li>
-    </ul>
-
-    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">4. 방문 시기(Month, SpecialDay)를 고려한 시즌 맞춤 프로모션 집중</h3>
-    <p style="margin-bottom: 12px;">
-        고객의 쇼핑 행동은 외부 시즌 요인에 크게 반응합니다. 특정 월(예: 블랙프라이데이를 포함한 11월, 연말인 12월 등)의 계절적 영향이나 특별한 기념일(<b>SpecialDay</b>)과의 근접성은 잠재 고객들의 심리적 구매 장벽을 극적으로 낮추는 결정적인 촉진제 역할을 수행합니다.
-    </p>
-    <ul style="margin-bottom: 10px; padding-left: 20px;">
-        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 의사결정나무 모델의 시즈널 트렌드 예측 결과를 기반으로 하여, 매출 기여도가 높은 특정 시즌 및 주요 공휴일 직전 기간에 마케팅 예산(Budget Allocation)을 집중적으로 편성하여 투자 대비 효율(ROI)을 극대화해야 합니다. 특히 특별한 날에 근접하여 유입되는 유저들에게는 'D-Day 한정 초특가', '오늘 자정 마감 임박' 등 타임아웃을 활용한 <b>FOMO(소외 불안)</b> 마케팅 기법과 개인화 혜택 소스를 적재적소에 노출시킴으로써 잠재된 충동구매 욕구를 구매 완료로 유도하는 전략이 필요합니다.</li>
-    </ul>
-</div>
-""")
+st.html(
+    '<div class="commentary-box" style="border-left: 5px solid #ff9900; background-color: #ffffff; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 10px;">\n'
+    '    <p style="font-size: 16px; margin-bottom: 25px; color: #4e73df; font-weight: 500;">\n'
+    '        위의 피처 중요도(Feature Importance) 및 의사결정나무(Decision Tree) 분기 결과를 종합해보면, 방문자의 최종 구매(Revenue) 여부를 결정짓는 가장 핵심적인 요소들을 파악할 수 있습니다. 이를 바탕으로 다음과 같은 비즈니스 수익화(Monetization) 극대화 액션 플랜을 제안합니다.\n'
+    '    </p>\n'
+    '\n'
+    '    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">1. 페이지 가치(PageValues) 극대화 및 장바구니 최적화</h3>\n'
+    '    <p style="margin-bottom: 12px;">\n'
+    '        머신러닝 분석 결과, <b>PageValues</b> (방문자가 구매 전에 머문 페이지의 평균 가치)가 구매 예측에 가장 압도적인 기여도를 가진 최중요 특성(Feature)으로 나타났습니다. 의사결정나무의 최상단 루트 노드 역시 해당 변수를 기준으로 고객을 1차 분류하며, 이 값이 임계점(약 6.02달러)을 넘을 때 높은 구매 확률을 보입니다.\n'
+    '    </p>\n'
+    '    <ul style="margin-bottom: 25px; padding-left: 20px;">\n'
+    '        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 높은 가치를 지닌 페이지(장바구니, 결제 프로세스, 베스트셀러 상품 상세 페이지 등)로 고객 유입을 유도하는 구매 깔깔때기(Funnel) 여정을 전면 최적화해야 합니다. 특히 결제 단계에서의 허들과 심리적 마찰(Friction)을 줄이기 위해 원클릭 간편 결제 시스템을 강화하고 간소화해야 합니다. 또한 장바구니에 도달하였으나 미결제 상태인 유저들에게는 타임 세일 팝업이나 무료 배송 쿠폰을 <b>넛지(Nudge)</b> 형태로 실시간 제공하여 이탈 없이 최종 구매를 확정 짓도록 효과적으로 유도해야 합니다.</li>\n'
+    '    </ul>\n'
+    '\n'
+    '    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">2. 이탈률(ExitRates) 분석 및 첫 페이지 체류(Retention) 방어 전략</h3>\n'
+    '    <p style="margin-bottom: 12px;">\n'
+    '        의사결정나무의 하위 분기 흐름을 보면, <b>ExitRates (종료율)</b>와 <b>BounceRates (반송률)</b> 수치가 높게 나타나는 고객 그룹은 수익 전환율이 급격히 저하되는 경향을 강하게 보입니다. 이는 사이트 진입 후 첫 브라우징 경험이 구매 여정에 심각한 병목을 유발하고 있음을 증명합니다.\n'
+    '    </p>\n'
+    '    <ul style="margin-bottom: 25px; padding-left: 20px;">\n'
+    '        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 유입 직후 반송 및 이탈이 유독 많이 발생하는 \'문제 랜딩 페이지\'와 상세 설명 페이지를 트래킹하여 직관적이고 매끄러운 UI/UX로 전면 개편해야 합니다. 기술적으로 페이지 로딩 속도를 1초 단위로 최적화하고 단축시켜야 하며, 웹 화면 상단(Above the Fold) 영역에 고객의 시선을 단번에 사로잡는 매력적인 프로모션 배너와 명확한 CTA(Call to Action) 버튼을 배치하여 다음 추천 페이지로의 탐색 이동을 적극 유도해야 합니다.</li>\n'
+    '    </ul>\n'
+    '\n'
+    '    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">3. 상품 집중 탐색(ProductRelated_Duration) 기반의 리타겟팅(Retargeting)</h3>\n'
+    '    <p style="margin-bottom: 12px;">\n'
+    '        단순 정보 조회성 페이지 브라우징에 비해, 상품 상세 탐색 페이지 방문 횟수(<b>ProductRelated</b>)와 해당 영역 체류 시간(<b>ProductRelated_Duration</b>)이 길고 깊어질수록 실제 최종 전환으로 이어질 확률이 매우 높습니다.\n'
+    '    </p>\n'
+    '    <ul style="margin-bottom: 25px; padding-left: 20px;">\n'
+    '        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 특정 상품 상세 페이지에 오래 머물며 진지하게 탐색을 하였으나 결제하지 않고 이탈한 고객들은 구매 관여도가 높은 최상급의 <b>\'고관여 잠재 고객\'</b> 군입니다. 이 유저 풀(Pool)을 실시간 세그먼트화하여 맞춤형 리마인드 이메일 발송, 모바일 앱 푸시 알림, 구글 및 메타 등의 스폰서드 개인화 타겟 광고 캠페인을 자동 집행해야 합니다. 추가적으로 유저가 유심히 살펴본 상품의 실시간 연관 상품 및 교차 판매(Cross-Selling) 추천 기능을 고도화하여 재유입 시 구매를 자극해야 합니다.</li>\n'
+    '    </ul>\n'
+    '\n'
+    '    <h3 style="color: #2e3e4e; font-size: 20px; border-bottom: 2px solid #f1f3f9; padding-bottom: 8px;">4. 방문 시기(Month, SpecialDay)를 고려한 시즌 맞춤 프로모션 집중</h3>\n'
+    '    <p style="margin-bottom: 12px;">\n'
+    '        고객의 쇼핑 행동은 외부 시즌 요인에 크게 반응합니다. 특정 월(예: 블랙프라이데이를 포함한 11월, 연말인 12월 등)의 계절적 영향이나 특별한 기념일(<b>SpecialDay</b>)과의 근접성은 잠재 고객들의 심리적 구매 장벽을 극적으로 낮추는 결정적인 촉진제 역할을 수행합니다.\n'
+    '    </p>\n'
+    '    <ul style="margin-bottom: 10px; padding-left: 20px;">\n'
+    '        <li style="margin-bottom: 8px;"><b>액션 플랜:</b> 의사결정나무 모델의 시즈널 트렌드 예측 결과를 기반으로 하여, 매출 기여도가 높은 특정 시즌 및 주요 공휴일 직전 기간에 마케팅 예산(Budget Allocation)을 집중적으로 편성하여 투자 대비 효율(ROI)을 극대화해야 합니다. 특히 특별한 날에 근접하여 유입되는 유저들에게는 \'D-Day 한정 초특가\', \'오늘 자정 마감 임박\' 등 타임아웃을 활용한 <b>FOMO(소외 불안)</b> 마케팅 기법과 개인화 혜택 소스를 적재적소에 노출시킴으로써 잠재된 충동구매 욕구를 구매 완료로 유도하는 전략이 필요합니다.</li>\n'
+    '    </ul>\n'
+    '</div>\n'
+)
