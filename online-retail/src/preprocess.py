@@ -57,14 +57,48 @@ def preprocess_data():
     print(f"정제 완료: 총 {len(products)}개의 고유 상품 식별.")
     
     # 4. 고객 통계 파이프라인 구축 (고객 페이지 정렬 기능 지원용)
-    print("4. 고객별 거래 및 매출 통계 생성 중...")
+    print("4. 고객별 RFM 지표 및 분위수 기반 세그먼트 생성 중...")
     valid_transactions['TotalSpend'] = valid_transactions['Quantity'] * valid_transactions['UnitPrice']
     
+    # 데이터셋의 가장 마지막(최신) 구매 날짜를 구하고 여기에 하루를 더해 기준일로 설정
+    max_date = valid_transactions['InvoiceDate'].max()
+    anchor_date = max_date + pd.Timedelta(days=1)
+    
+    # 고객별 Recency, Frequency, Monetary 집계
     customer_stats = valid_transactions.groupby('CustomerID').agg(
+        Recency=('InvoiceDate', lambda x: (anchor_date - x.max()).days),
+        Frequency=('InvoiceNo', 'nunique'),
+        Monetary=('TotalSpend', 'sum'),
         Total_Spend=('TotalSpend', 'sum'),
         Unique_Products=('StockCode', 'nunique'),
-        Purchase_Count=('InvoiceNo', 'nunique') # 총 주문 횟수
+        Purchase_Count=('InvoiceNo', 'nunique')  # 기존 필드 호환용 보존
     ).reset_index()
+    
+    # 5분위수(1~5점) 기반의 등급 분류 (분위 경계 중복 오류 방지를 위해 rank 적용)
+    customer_stats['R_Score'] = pd.qcut(customer_stats['Recency'].rank(method='first'), 5, labels=[5, 4, 3, 2, 1]).astype(int)
+    customer_stats['F_Score'] = pd.qcut(customer_stats['Frequency'].rank(method='first'), 5, labels=[1, 2, 3, 4, 5]).astype(int)
+    customer_stats['M_Score'] = pd.qcut(customer_stats['Monetary'].rank(method='first'), 5, labels=[1, 2, 3, 4, 5]).astype(int)
+    
+    # 규칙 기반 세그먼트 정의 함수
+    def assign_segment(row):
+        r, f, m = row['R_Score'], row['F_Score'], row['M_Score']
+        # VIP
+        if r >= 4 and f >= 4 and m >= 4:
+            return 'VIP'
+        # Loyal Customers
+        elif (r >= 3 and f >= 3) or (r >= 3 and m >= 3):
+            return 'Loyal'
+        # New/Promising
+        elif r >= 4 and f < 3 and m < 3:
+            return 'New/Promising'
+        # About to Sleep
+        elif r <= 2 and (f >= 3 or m >= 3):
+            return 'About to Sleep'
+        # Lost/Hibernating
+        else:
+            return 'Lost/Hibernating'
+            
+    customer_stats['RFM_Segment'] = customer_stats.apply(assign_segment, axis=1)
     
     # 5. TF-IDF 및 임베딩 벡터 구하기
     print("5. TF-IDF 및 Sentence-Transformer 임베딩 유사도 계산 중...")
