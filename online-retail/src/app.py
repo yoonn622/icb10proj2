@@ -77,6 +77,24 @@ st.sidebar.metric("총 정제 상품 수", f"{len(products):,} 개")
 st.sidebar.metric("총 등록 고객 수", f"{len(customer_stats):,} 명")
 
 
+# ----------------- Mermaid 렌더러 함수 -----------------
+def render_mermaid(code: str, height: int = 350):
+    """Mermaid.js ESM CDN을 사용해 독립된 iframe 내에서 다이어그램을 렌더링"""
+    html_code = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #888; text-align: center; margin-bottom: 6px;">
+        ⚠️ 다이어그램 로드에 실패하거나 공백일 경우 인터넷 연결 상태를 확인해 주세요. (Mermaid CDN 연동)
+    </div>
+    <div class="mermaid" style="display:flex; justify-content:center; align-items:center; background-color: #fafafa; padding: 10px; border-radius: 8px; border: 1px dashed #ddd; min-height: 250px;">
+        {code}
+    </div>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({{ startOnLoad: true, theme: 'neutral' }});
+    </script>
+    """
+    st.components.v1.html(html_code, height=height)
+
+
 # ----------------- 공통 추천 함수 -----------------
 def get_recommendations(target_idx, similarity_matrix, k, threshold):
     """상품 기준 유사 상위 상품 반환"""
@@ -102,6 +120,48 @@ def get_recommendations(target_idx, similarity_matrix, k, threshold):
 if page == "🛒 상품 분석 & 추천":
     st.title("🛒 상품 콘텐츠 기반 추천 및 데이터 분석")
     st.markdown("상품명 텍스트의 형태적(TF-IDF) 특징과 사전학습된 임베딩(Sentence-Transformer)을 이용해 유사 상품을 조회하고 분석합니다.")
+    
+    # 하위 상세 메뉴 분기
+    sub_menu = st.sidebar.radio("📋 상세 메뉴", ["📊 상품 분석 및 추천 대시보드", "📖 CB 추천 기술 아키텍처"], key="p1_submenu")
+    
+    if sub_menu == "📖 CB 추천 기술 아키텍처":
+        st.subheader("📖 콘텐츠 기반 필터링 (Content-Based Filtering) 기술 아키텍처")
+        st.markdown("""
+        콘텐츠 기반 필터링(Content-Based Filtering)은 아이템이 가진 고유의 텍스트, 메타데이터 등 속성 정보 자체를 분석하여 사용자가 과거에 선호했던 아이템과 유사한 특징을 지닌 다른 아이템을 추천하는 기술입니다. 본 시스템에서는 쇼핑몰에 등록된 상품의 명칭(Description) 데이터를 주 피처로 활용합니다.
+        전체 연산 과정은 다음과 같이 분할됩니다. 먼저, 영문 상품명 데이터에서 특수문자를 제거하고 소문자로 표준화하는 텍스트 정제 작업을 수행합니다. 그 후 Scikit-learn의 `TfidfVectorizer`를 적용해 각 단어의 문서 내 출현 빈도(TF)와 역문서 빈도(IDF)를 결합하여 희소 벡터(Sparse Vector) 공간으로 상품을 임베딩합니다. TF-IDF는 문서 집합 내에서 범용적으로 쓰이는 단어의 가중치는 낮추고, 특정 상품명에서 독창적으로 나타나는 핵심 단어의 중요도를 높여 특징을 고도로 포착합니다.
+        이렇게 형성된 상품별 특징 벡터에 대해 수학적으로 두 벡터 사이의 사잇각을 구하는 코사인 유사도(Cosine Similarity) 행렬을 계산합니다. 유사도 값은 -1에서 1 사이로 정규화되며, 1에 가까울수록 두 상품이 언어적으로 유사함을 뜻합니다. 이 방식은 다른 사용자의 평가나 거래 행태에 의존하지 않으므로, 신규 등록된 상품이라도 즉각 추천 풀에 포함할 수 있다는 '콜드 스타트(Cold Start)' 강점을 지니고 있습니다. 반면, 고객에게 늘 비슷한 속성의 상품만을 제안하게 되므로 다양성(Diversity)이 떨어지고 '필터 버블(Filter Bubble)'에 갇힐 우려가 공존합니다.
+        """)
+        
+        st.markdown("### 1. 기술 파이프라인 (Flowchart)")
+        cb_flow = """
+        graph TD
+            A[상품 원본 데이터] --> B[텍스트 전처리: 소문자화, 특수문자 제거]
+            B --> C[TF-IDF 벡터화 및 Vocabulary 사전 생성]
+            C --> D[상품별 특징 벡터 행렬 구축]
+            D --> E[Cosine Similarity 유사도 행렬 계산]
+            E --> F[유사 상품 및 추천 결과 반환]
+            style A fill:#f9f,stroke:#333,stroke-width:2px
+            style F fill:#bbf,stroke:#333,stroke-width:2px
+        """
+        render_mermaid(cb_flow, height=350)
+        
+        st.markdown("### 2. 컴포넌트 상호작용 (Sequence Diagram)")
+        cb_seq = """
+        sequenceDiagram
+            autonumber
+            participant U as 사용자/대시보드
+            participant P as 전처리 엔진
+            participant M as 유사도 연산 모듈
+            participant D as 데이터베이스
+            
+            U->>P: 상품 키워드/이력 입력
+            P->>D: 상품 텍스트 정보 질의 (Description)
+            D-->>P: 상품 텍스트 데이터 반환
+            P->>M: TF-IDF 및 코사인 유사도 계산 요청
+            M-->>U: 텍스트 특징 유사도 행렬 및 추천 목록 반환
+        """
+        render_mermaid(cb_seq, height=380)
+        st.stop()
     
     # 추천 파라미터 UI
     st.sidebar.subheader("⚙️ 추천 세부 조절")
@@ -267,6 +327,49 @@ if page == "🛒 상품 분석 & 추천":
 elif page == "👤 고객 분석 & 추천":
     st.title("👤 고객 분석 및 개인화 추천 시스템")
     st.markdown("고객별 구매 내역 통계를 조회하고, 3개 모델(TF-IDF 프로필, 임베딩 프로필, 아이템 기반 협업 필터링)의 개인화 추천 결과를 비교합니다.")
+    
+    # 하위 상세 메뉴 분기
+    sub_menu = st.sidebar.radio("📋 상세 메뉴", ["📊 고객 추천 대시보드", "📖 CF 추천 기술 아키텍처"], key="p2_submenu")
+    
+    if sub_menu == "📖 CF 추천 기술 아키텍처":
+        st.subheader("📖 협업 필터링 (Collaborative Filtering) 기술 아키텍처")
+        st.markdown("""
+        협업 필터링(Collaborative Filtering)은 특정 사용자의 개인적인 취향 정보만을 분석하는 콘텐츠 기반 방식과 달리, 대규모 사용자 그룹의 집단지성(Collective Intelligence)과 구매 이력 정보를 종합하여 추천을 수행하는 알고리즘입니다. 본 시스템에 적용된 Item-based CF는 '유사한 상품을 구매한 다른 고객들은 이 상품도 함께 샀다'는 상관성에 기반합니다.
+        구현 파이프라인은 다음과 같이 구성됩니다. 먼저 개별 고객(Row)과 상품(Column)으로 이루어진 피벗 매트릭(User-Item Matrix)를 구축하고, 각 셀에는 구매 총 수량 혹은 구매 총액을 기입합니다. 이후 상품 열(Column Vector) 간의 유사도를 연산하여 상품 간 유사도 행렬을 도출합니다. 이때 단순히 0/1 이진 행태가 아니라 실질적인 거래 기여도를 반영하기 위해 코사인 유사도를 적용합니다. 타겟 유저에게 추천할 때는 유저가 기존에 구매했던 모든 아이템의 유사도 벡터를 가져온 뒤, 구매 강도(주문 횟수 등)를 가중치로 부여하여 선형 결합(Linear Combination)을 수행합니다. 이를 통해 아직 구매하지 않은 상품들에 대해 유저가 보일 잠재적 선호 스코어를 일괄 도출하고 상위 $N$개를 최종 제안합니다.
+        이 방식은 텍스트 메타데이터가 아예 없거나 정제되지 않은 상품일지라도 거래 이력만 있다면 정밀하게 관계를 맺어준다는 엄청난 비즈니스 가치가 있으며, 특히 예상치 못한 의외의 상품을 제안하는 교차 추천(Cross-selling) 능력이 뛰어납니다. 다만, 거래 이력이 누적되지 않은 신규 상품이나 고객에 대해서는 추천 정확도가 급격히 저하되는 전형적인 콜드 스타트 문제를 안고 있습니다.
+        """)
+        
+        st.markdown("### 1. 기술 파이프라인 (Flowchart)")
+        cf_flow = """
+        graph TD
+            A[구매 거래 이력 데이터] --> B[고객-상품 구매 피벗 매트릭스 생성]
+            B --> C[아이템 기준 코사인 유사도 행렬 계산]
+            C --> D[과거 구매 이력 가중치 합 연산]
+            D --> E[미구매 상품에 대한 선호도 스코어 예측]
+            E --> F[최종 연관 추천 결과 도출]
+            style A fill:#f9f,stroke:#333,stroke-width:2px
+            style F fill:#bbf,stroke:#333,stroke-width:2px
+        """
+        render_mermaid(cf_flow, height=350)
+        
+        st.markdown("### 2. 컴포넌트 상호작용 (Sequence Diagram)")
+        cf_seq = """
+        sequenceDiagram
+            autonumber
+            participant U as 사용자
+            participant S as 대시보드 컨트롤러
+            participant C as CF 연산 모델
+            participant M as 전처리 데이터 (customer_stats)
+            
+            U->>S: 특정 고객 ID 조회 및 추천 요청
+            S->>M: 해당 고객의 과거 거래 내역 로드
+            M-->>S: 구매 상품 목록 및 빈도 반환
+            S->>C: 타 유저 공동 구매 패턴 기반 점수 산출
+            C-->>S: 미구매 유사 상품 가중 합 스코어 전송
+            S-->>U: 최종 협업 필터링 추천 결과 렌더링
+        """
+        render_mermaid(cf_seq, height=380)
+        st.stop()
     
     # 추천 파라미터 UI (사이드바)
     st.sidebar.subheader("⚙️ 고객 추천 설정")
@@ -515,6 +618,50 @@ elif page == "👤 고객 분석 & 추천":
 elif page == "👥 고객 군집화 분석":
     st.title("👥 고객 RFM 기반 군집화 및 세그먼트 분석")
     st.markdown("머신러닝(K-Means) 알고리즘을 사용한 군집화 결과와 마케팅 규칙 기반 세그먼트를 3차원 공간에서 대조 및 분석합니다.")
+    
+    # 하위 상세 메뉴 분기
+    sub_menu = st.sidebar.radio("📋 상세 메뉴", ["📊 고객 군집 및 세그먼트 대시보드", "📖 K-Means & RFM 분석 기술 원리"], key="p3_submenu")
+    
+    if sub_menu == "📖 K-Means & RFM 분석 기술 원리":
+        st.subheader("📖 K-Means & RFM 분석 기술 아키텍처")
+        st.markdown("""
+        고객 군집 분석(Customer Segmentation)은 비즈니스 데이터로부터 고객의 행동 패턴을 요약하고, 마케팅 효율성을 극대화하기 위해 유사한 특성을 지닌 고객 집단을 그룹화하는 비지도 학습(Unsupervised Learning) 기법입니다. 본 대시보드에서는 가장 널리 활용되는 RFM 모델(Recency: 최근성, Frequency: 빈도, Monetary: 금액)과 K-Means 알고리즘을 결합하여 분석을 고도화했습니다.
+        먼저, 원본 RFM 데이터는 대개 빈도가 극소수에 쏠려 있고 고액 결제자가 극도로 편중된 강한 비대칭성(Skewness) 분포를 보입니다. K-Means는 유클리드 거리 기반으로 공간을 분할하기 때문에 왜도가 크면 특정 이상치 군집만 비정상적으로 조밀해지는 문제가 있습니다. 이를 예방하기 위해 모든 입력 피처에 자연로그 변환(`np.log1p`)을 가하여 왜도를 줄인 뒤, StandardScaler를 거쳐 평균 0, 분산 1의 균등한 가중치를 갖도록 표준 정규화합니다.
+        이후 설정된 $K$에 따라 K-Means를 수행하여 반복적으로 군집 중심(Centroid)을 갱신하고 거리를 최소화하는 경계를 획득합니다. 대시보드는 이 모델의 신뢰성을 정량 검증하기 위해 WCSS(엘보우 기법) 및 평균 실루엣 계수 곡선, 개별 군집의 실루엣 분포를 시각화합니다. 특히 실루엣 계수는 개별 고객이 속한 군집의 내부 응집성과 타 군집과의 분리 비율을 수학적으로 평가하여 최적의 군집 개수를 판별하는 표준 척도입니다. 마케터는 최종적으로 매핑된 핵심 VIP, 고액 이탈 위험군, 신규 잠재 고객군의 비중을 대조하고 각 세그먼트별 차별화된 마케팅 비용 투자 및 리텐션 전략을 과학적으로 수립할 수 있습니다.
+        """)
+        
+        st.markdown("### 1. 기술 파이프라인 (Flowchart)")
+        cl_flow = """
+        graph TD
+            A[고객별 RFM 통계 원본 추출] --> B[비선형 데이터 로그 변환 np.log1p]
+            B --> C[StandardScaler 특징 표준 정규화]
+            C --> D[실시간 K-Means 클러스터링 알고리즘 구동]
+            D --> E[엘보우/실루엣 성능 평가 및 최적 K 결정]
+            E --> F[동적 군집 통계 및 맞춤 마케팅 액션플랜 수립]
+            style A fill:#f9f,stroke:#333,stroke-width:2px
+            style F fill:#bbf,stroke:#333,stroke-width:2px
+        """
+        render_mermaid(cl_flow, height=350)
+        
+        st.markdown("### 2. 컴포넌트 상호작용 (Sequence Diagram)")
+        cl_seq = """
+        sequenceDiagram
+            autonumber
+            participant M as 마케터/사용자
+            participant S as Streamlit 대시보드
+            participant K as K-Means 클러스터러
+            participant E as 모델 평가 모듈
+            
+            M->>S: 슬라이더로 K값 변경 (K=4)
+            S->>K: 정규화된 RFM 샘플 특징 입력 (1,000명)
+            K->>K: 거리 기반 센트로이드 반복 수렴
+            K-->>S: 군집 배정 결과 반환
+            S->>E: WCSS 및 실루엣 계수 연산 위임
+            E-->>S: 다차원 평가 지표 및 분포 차트 리턴
+            S-->>M: 3D 시각화 및 마케팅 전략 동적 노출
+        """
+        render_mermaid(cl_seq, height=380)
+        st.stop()
     
     # 사이드바에서 군집 개수 조절 및 세션 상태 동기화
     k_val = st.sidebar.slider(
