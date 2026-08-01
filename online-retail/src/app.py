@@ -15,6 +15,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples, silhouette_score
 from plotly.subplots import make_subplots
 
 # 페이지 설정
@@ -540,14 +541,18 @@ elif page == "👥 고객 군집화 분석":
     rfm_df['Cluster'] = kmeans.fit_predict(X_scaled)
     rfm_df['Cluster'] = rfm_df['Cluster'].astype(str)
     
-    # Plotly 3D 서브플롯 생성 (1행 2열)
+    # Plotly 3D 서브플롯 생성 (1행 3열)
     fig = make_subplots(
-        rows=1, cols=2,
-        specs=[[{'type': 'scatter3d'}, {'type': 'scatter3d'}]],
-        subplot_titles=(f"K-Means 군집화 결과 (K={k_val})", "마케팅 규칙 기반 RFM 세그먼트")
+        rows=1, cols=3,
+        specs=[[{'type': 'scatter3d'}, {'type': 'scatter3d'}, {'type': 'scatter3d'}]],
+        subplot_titles=(
+            "K-Means 군집화 (원본 척도)", 
+            "K-Means 군집화 (로그 변환)", 
+            "마케팅 규칙 기반 RFM 세그먼트"
+        )
     )
     
-    # 왼쪽: K-Means 군집 산점도
+    # 1. 왼쪽: K-Means 군집 산점도 (원본 척도, Z축만 로그)
     for cluster_id in sorted(rfm_df['Cluster'].unique()):
         sub = rfm_df[rfm_df['Cluster'] == cluster_id]
         fig.add_trace(
@@ -560,7 +565,20 @@ elif page == "👥 고객 군집화 분석":
             row=1, col=1
         )
         
-    # 오른쪽: RFM 세그먼트 산점도
+    # 2. 중간: 완전히 로그 변환된 RFM 데이터 점 3D
+    for cluster_id in sorted(rfm_df['Cluster'].unique()):
+        sub = rfm_df[rfm_df['Cluster'] == cluster_id]
+        fig.add_trace(
+            go.Scatter3d(
+                x=np.log1p(sub['Recency']), y=np.log1p(sub['Frequency']), z=np.log1p(sub['Monetary']),
+                mode='markers',
+                marker=dict(size=4, opacity=0.7),
+                name=f"Cluster {cluster_id} (Log)"
+            ),
+            row=1, col=2
+        )
+        
+    # 3. 오른쪽: RFM 세그먼트 산점도 (원본 척도, Z축만 로그)
     segments = ['VIP', 'Loyal', 'New/Promising', 'About to Sleep', 'Lost/Hibernating']
     colors = {'VIP': '#d62728', 'Loyal': '#1f77b4', 'New/Promising': '#2ca02c', 'About to Sleep': '#ff7f0e', 'Lost/Hibernating': '#7f7f7f'}
     for seg in segments:
@@ -572,14 +590,15 @@ elif page == "👥 고객 군집화 분석":
                 marker=dict(size=4, opacity=0.7, color=colors.get(seg, '#7f7f7f')),
                 name=seg
             ),
-            row=1, col=2
+            row=1, col=3
         )
         
     fig.update_layout(
-        height=650,
+        height=600,
         margin=dict(l=0, r=0, b=0, t=50),
         scene=dict(xaxis_title='최근성(Recency)', yaxis_title='빈도(Frequency)', zaxis_title='금액(Monetary)', zaxis_type='log'),
-        scene2=dict(xaxis_title='최근성(Recency)', yaxis_title='빈도(Frequency)', zaxis_title='금액(Monetary)', zaxis_type='log')
+        scene2=dict(xaxis_title='로그 최근성', yaxis_title='로그 빈도', zaxis_title='로그 금액'),
+        scene3=dict(xaxis_title='최근성(Recency)', yaxis_title='빈도(Frequency)', zaxis_title='금액(Monetary)', zaxis_type='log')
     )
     st.plotly_chart(fig, use_container_width=True)
     
@@ -620,3 +639,120 @@ elif page == "👥 고객 군집화 분석":
                 st.info("**[유망 신규/잠재 군집]**\n\n* **특성**: 최근에 유입되었으나 아직 누적 구매 빈도와 지출액이 낮은 초기 활성 고객군입니다.\n* **액션플랜**: 재구매 유도를 위한 첫 구매 감사 소액 할인권 발행, 연관 구매율이 높은 크로스셀링(Cross-selling) 추천 서비스 노출.")
             else:
                 st.error("**[장기 휴면/이탈 대기]**\n\n* **특성**: 마지막 구매일이 매우 오래되었으며 구매 빈도 및 금액이 모두 하위권인 고객군입니다.\n* **액션플랜**: 마케팅 비용 투자를 최소화하되, 분기별 빅세일 등 대규모 프로모션 메일링 기반의 저비용 전체 타겟 마케팅 진행.")
+
+    # 4. 하단 군집 분석 평가 영역 추가
+    st.markdown("---")
+    st.subheader("📉 K-Means 군집 모델 다차원 평가 리포트")
+    st.markdown("군집 적정성을 평가하기 위해 엘보우 기법, 평균 실루엣 계수 추이, 그리고 설정된 군집 수($K$) 하에서의 개별 실루엣 프로필 분포를 제공합니다.")
+    
+    # 연산 최적화를 위해 1000명 샘플 데이터 추출 (반응 속도 확보)
+    np.random.seed(42)
+    if len(X_scaled) > 1000:
+        sample_indices = np.random.choice(len(X_scaled), 1000, replace=False)
+        X_scaled_sample = X_scaled[sample_indices]
+        current_labels_sample = kmeans.fit_predict(X_scaled_sample) # 현재 K에 대응
+    else:
+        X_scaled_sample = X_scaled
+        current_labels_sample = kmeans.fit_predict(X_scaled)
+        
+    # K=2~8에 대한 WCSS(Inertia) 및 평균 실루엣 계수 계산
+    k_range = list(range(2, 9))
+    inertias = []
+    avg_silhouettes = []
+    
+    for k in k_range:
+        km = KMeans(n_clusters=k, random_state=42, n_init=10)
+        cluster_labels = km.fit_predict(X_scaled_sample)
+        inertias.append(km.inertia_)
+        avg_silhouettes.append(silhouette_score(X_scaled_sample, cluster_labels))
+        
+    # 개별 실루엣 분석용 라벨 및 실루엣 샘플 값 획득 (현재 k_val 기준)
+    sample_silhouette_values = silhouette_samples(X_scaled_sample, current_labels_sample)
+    
+    # 2D 서브플롯 1행 3열 생성
+    fig_eval = make_subplots(
+        rows=1, cols=3,
+        subplot_titles=(
+            "1. 엘보우 기법 (Optimal K 탐색)",
+            "2. 평균 실루엣 계수 추이",
+            f"3. 군집별 실루엣 프로필 (K={k_val})"
+        )
+    )
+    
+    # Subplot 1: 엘보우 곡선
+    fig_eval.add_trace(
+        go.Scatter(x=k_range, y=inertias, mode='lines+markers', name='Inertia (WCSS)', line=dict(color='#1f77b4', width=3)),
+        row=1, col=1
+    )
+    
+    # Subplot 2: 평균 실루엣 점수 추이
+    fig_eval.add_trace(
+        go.Scatter(x=k_range, y=avg_silhouettes, mode='lines+markers', name='평균 실루엣 계수', line=dict(color='#2ca02c', width=3)),
+        row=1, col=2
+    )
+    
+    # Subplot 3: 군집별 실루엣 계수 개별 분포 (Silhouette plot)
+    y_lower = 10
+    cluster_colors = px.colors.qualitative.Plotly
+    
+    for i in range(k_val):
+        ith_cluster_sil_vals = sample_silhouette_values[current_labels_sample == i]
+        ith_cluster_sil_vals.sort()
+        
+        size_cluster_i = len(ith_cluster_sil_vals)
+        y_upper = y_lower + size_cluster_i
+        
+        y_range = np.arange(y_lower, y_upper)
+        fig_eval.add_trace(
+            go.Scatter(
+                x=ith_cluster_sil_vals,
+                y=y_range,
+                fill='tozeroy',
+                mode='lines',
+                line=dict(width=0.5, color=cluster_colors[i % len(cluster_colors)]),
+                name=f"군집 {i}",
+                fillcolor=cluster_colors[i % len(cluster_colors)],
+                opacity=0.6,
+                showlegend=False
+            ),
+            row=1, col=3
+        )
+        y_lower = y_upper + 10
+        
+    # 실루엣 평균 기준선 추가
+    mean_score = avg_silhouettes[k_range.index(k_val)]
+    fig_eval.add_trace(
+        go.Scatter(
+            x=[mean_score, mean_score],
+            y=[0, y_lower],
+            mode='lines',
+            line=dict(color='red', dash='dash', width=2),
+            name='평균 실루엣 점수',
+            showlegend=False
+        ),
+        row=1, col=3
+    )
+    
+    fig_eval.update_layout(
+        height=380,
+        margin=dict(l=20, r=20, t=40, b=40),
+        showlegend=False
+    )
+    fig_eval.update_xaxes(title_text="군집 개수 (K)", row=1, col=1)
+    fig_eval.update_yaxes(title_text="Inertia (WCSS)", row=1, col=1)
+    
+    fig_eval.update_xaxes(title_text="군집 개수 (K)", row=1, col=2)
+    fig_eval.update_yaxes(title_text="실루엣 점수", row=1, col=2)
+    
+    fig_eval.update_xaxes(title_text="실루엣 계수", row=1, col=3)
+    fig_eval.update_yaxes(showticklabels=False, row=1, col=3)
+    
+    st.plotly_chart(fig_eval, use_container_width=True)
+    
+    # 지표 설명 텍스트 제공
+    st.info("""
+    💡 **군집 평가 지표 가이드**:
+    1. **엘보우 기법**: 군집 수 $K$가 증가함에 따라 각 점과 군집 중심 간 거리 제곱합(Inertia)은 감소합니다. 기울기가 급격하게 완만해지는 '꺾임점(Elbow)'이 통계적으로 최적의 군집 개수입니다.
+    2. **평균 실루엣 계수**: 개별 데이터가 자신이 속한 군집 내 다른 데이터와 얼마나 가깝고(응집도), 인접한 다른 군집과는 얼마나 먼지(분리도)를 나타냅니다. 1에 가까울수록 이상적인 군집 분할입니다.
+    3. **군집별 실루엣 프로필**: 평균선(붉은 점선)을 넘는 면적이 넓고, 각 군집의 두께(고객 수)가 일정하며, 0 미만의 음수 계수(잘못 분류된 고객)가 최소화될 때 우수한 모델입니다.
+    """)
