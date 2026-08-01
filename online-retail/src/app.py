@@ -309,6 +309,35 @@ elif page == "👤 고객 분석 & 추천":
         stat_col2.metric("구매한 고유 상품 수", f"{selected_cust_stats['Unique_Products']:,} 종")
         stat_col3.metric("총 주문 횟수", f"{selected_cust_stats['Purchase_Count']:,} 회")
         
+        # 전체 세션 군집 개수(K)를 기반으로 백그라운드 K-Means 계산 수행
+        k_val = st.session_state.get('n_clusters', 4)
+        X_scaled_eval = StandardScaler().fit_transform(np.log1p(customer_stats[['Recency', 'Frequency', 'Monetary']]))
+        kmeans_eval = KMeans(n_clusters=k_val, random_state=42, n_init=10)
+        customer_stats['Cluster'] = kmeans_eval.fit_predict(X_scaled_eval)
+        
+        selected_cust_full = customer_stats[customer_stats['CustomerID'] == search_cust].iloc[0]
+        
+        st.markdown("---")
+        st.markdown("### 🎯 고객 세그먼트 및 군집 프로파일링")
+        scol1, scol2 = st.columns(2)
+        with scol1:
+            st.markdown(f"**규칙 기반 RFM 세그먼트**: `{selected_cust_full['RFM_Segment']}`")
+            if selected_cust_full['RFM_Segment'] == 'VIP':
+                st.success("이 고객은 구매 빈도와 금액이 모두 최상위인 **VIP (Champions)** 핵심 고객입니다.")
+            elif selected_cust_full['RFM_Segment'] == 'Loyal':
+                st.info("이 고객은 주기적인 거래를 발생시키고 있는 안정적인 **충성 고객 (Loyal)**입니다.")
+            elif selected_cust_full['RFM_Segment'] == 'New/Promising':
+                st.success("이 고객은 최근 신규 유입되어 관리가 필요한 **신규/잠재 고객 (New/Promising)**입니다.")
+            elif selected_cust_full['RFM_Segment'] == 'About to Sleep':
+                st.warning("이 고객은 재구매 유도가 필요한 **휴면 우려 (About to Sleep)** 대상입니다.")
+            else:
+                st.error("이 고객은 오랫동안 거래가 없고 가치가 낮은 **이탈/겨울잠 고객 (Lost)**입니다.")
+                
+        with scol2:
+            st.markdown(f"**머신러닝 K-Means 군집**: `Cluster {selected_cust_full['Cluster']}`")
+            st.write("설정된 군집 수(K) 기준 분류 결과이며, 해당 군집의 평균 구매 특성에 따른 마케팅 세그먼트 매핑에 해당합니다.")
+            
+        st.markdown("---")
         # 해당 고객의 상세 구매 내역
         st.write("#### 🛒 고객의 과거 구매 상품 목록")
         cust_purchases = cust_tx[cust_tx['CustomerID'] == search_cust].copy()
@@ -324,6 +353,12 @@ elif page == "👤 고객 분석 & 추천":
     # Tab 2: 개인화 추천 모델 비교
     with cust_tab2:
         st.subheader(f"🎁 {search_cust} 고객 맞춤형 상품 추천 비교")
+        # 탭 2에서도 세션 n_clusters 기준으로 군집 분석 결과 획득
+        k_val = st.session_state.get('n_clusters', 4)
+        X_scaled_eval = StandardScaler().fit_transform(np.log1p(customer_stats[['Recency', 'Frequency', 'Monetary']]))
+        kmeans_eval = KMeans(n_clusters=k_val, random_state=42, n_init=10)
+        customer_stats['Cluster'] = kmeans_eval.fit_predict(X_scaled_eval)
+        selected_cust_full = customer_stats[customer_stats['CustomerID'] == search_cust].iloc[0]
         st.markdown("사용자가 구매한 이력을 바탕으로 **3개 추천 모델**이 추천한 상위 10개 상품을 비교 대조합니다.")
         
         # 상품 코드 대 인덱스 매핑 구성
@@ -395,6 +430,19 @@ elif page == "👤 고객 분석 & 추천":
             with rcol3:
                 st.markdown("#### 👥 협업 필터링 (CF) 추천")
                 st.caption("고객의 구매 목록과 타 유저들의 구매 패턴 유사도를 활용하여 연관 아이템을 추천합니다.")
+                
+                # 군집 맞춤형 가이드 박스 표시
+                if selected_cust_full['RFM_Segment'] == 'VIP':
+                    st.info("💡 **마케팅 전략 (VIP)**\n최상위 전용 럭셔리 품목 추천 노출 및 무료 특급 배송 쿠폰 자동 활성화 적용 권장.")
+                elif selected_cust_full['RFM_Segment'] == 'Loyal':
+                    st.info("💡 **마케팅 전략 (충성 고객)**\n정기 구독 혜택 안내 및 다회 구매 할인 캠페인 적용 권장.")
+                elif selected_cust_full['RFM_Segment'] == 'New/Promising':
+                    st.success("💡 **마케팅 전략 (신규/잠재)**\n감사 웰컴 5% 할인 프로모션 코드 제공을 통한 크로스셀링 구매 유도.")
+                elif selected_cust_full['RFM_Segment'] == 'About to Sleep':
+                    st.warning("💡 **마케팅 전략 (휴면 우려)**\n'보고 싶었습니다!' 리마인드 10% 단독 특별 할인 혜택 메시지 발송 동반 권장.")
+                else:
+                    st.error("💡 **마케팅 전략 (이탈/겨울잠)**\n마케팅 비용 최소화 및 정기 뉴스레터를 통한 장기 할인 노출 적용.")
+                    
                 display_c = rec_cf_df.copy()
                 display_c.columns = ['상품코드', '상품명', '가중 점수']
                 display_c['가중 점수'] = display_c['가중 점수'].map(lambda x: f"{x:.2f}")
