@@ -756,3 +756,53 @@ elif page == "👥 고객 군집화 분석":
     2. **평균 실루엣 계수**: 개별 데이터가 자신이 속한 군집 내 다른 데이터와 얼마나 가깝고(응집도), 인접한 다른 군집과는 얼마나 먼지(분리도)를 나타냅니다. 1에 가까울수록 이상적인 군집 분할입니다.
     3. **군집별 실루엣 프로필**: 평균선(붉은 점선)을 넘는 면적이 넓고, 각 군집의 두께(고객 수)가 일정하며, 0 미만의 음수 계수(잘못 분류된 고객)가 최소화될 때 우수한 모델입니다.
     """)
+
+    # 5. 군집별/세그먼트별 데이터 수 분포 시각화 추가
+    st.markdown("---")
+    st.subheader("📊 군집 및 세그먼트별 고객 분포 비교")
+    st.markdown("머신러닝 알고리즘에 의해 자동 분류된 군집별 고객 규모와 전통적인 마케팅 규칙 세그먼트별 규모를 가로로 대조합니다.")
+    
+    # 1행 2열 서브플롯 생성
+    fig_dist = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=("K-Means 군집별 고객 수 분포", "마케팅 규칙 기반 RFM 세그먼트별 고객 수 분포")
+    )
+    
+    # 군집별 데이터 계산 및 시각화 (K-Means)
+    cluster_counts = rfm_df['Cluster'].value_counts().sort_index()
+    fig_dist.add_trace(
+        go.Bar(
+            x=[f"Cluster {c}" for c in cluster_counts.index],
+            y=cluster_counts.values,
+            marker_color='#1f77b4',
+            name='K-Means 군집',
+            text=cluster_counts.values,
+            textposition='auto'
+        ),
+        row=1, col=1
+    )
+    
+    # 세그먼트별 데이터 계산 및 시각화 (RFM Segment)
+    segment_order = ['VIP', 'Loyal', 'New/Promising', 'About to Sleep', 'Lost/Hibernating']
+    seg_counts = rfm_df['RFM_Segment'].value_counts().reindex(segment_order).fillna(0).astype(int)
+    fig_dist.add_trace(
+        go.Bar(
+            x=seg_counts.index,
+            y=seg_counts.values,
+            marker_color='#2ca02c',
+            name='RFM 세그먼트',
+            text=seg_counts.values,
+            textposition='auto'
+        ),
+        row=1, col=2
+    )
+    
+    fig_dist.update_layout(
+        height=380,
+        margin=dict(l=20, r=20, t=40, b=40),
+        showlegend=False
+    )
+    fig_dist.update_yaxes(title_text="고객 수 (명)", row=1, col=1)
+    fig_dist.update_yaxes(title_text="고객 수 (명)", row=1, col=2)
+    
+    st.plotly_chart(fig_dist, use_container_width=True)
