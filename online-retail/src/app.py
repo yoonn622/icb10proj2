@@ -13,6 +13,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from plotly.subplots import make_subplots
 
 # 페이지 설정
 st.set_page_config(
@@ -22,7 +25,8 @@ st.set_page_config(
 )
 
 # ----------------- 데이터 로딩 및 캐싱 -----------------
-@st.cache_data
+st.cache_data.clear()
+# @st.cache_data
 def load_base_data():
     """기본 데이터셋 로딩"""
     products = pd.read_parquet('online-retail/data/products.parquet')
@@ -59,8 +63,11 @@ products['prob'] = products['Popularity'] / total_popularity
 products['info_content'] = -np.log2(products['prob'] + 1e-9)
 
 # ----------------- 사이드바 네비게이션 -----------------
+if 'n_clusters' not in st.session_state:
+    st.session_state['n_clusters'] = 4
+
 st.sidebar.title("🧭 메뉴 선택")
-page = st.sidebar.radio("이동할 페이지를 선택하세요:", ["🛒 상품 분석 & 추천", "👤 고객 분석 & 추천"])
+page = st.sidebar.radio("이동할 페이지를 선택하세요:", ["🛒 상품 분석 & 추천", "👤 고객 분석 & 추천", "👥 고객 군집화 분석"])
 
 # 사이드바 하단 정보 표시
 st.sidebar.markdown("---")
@@ -281,8 +288,8 @@ elif page == "👤 고객 분석 & 추천":
         
         sorted_customers = customer_stats.sort_values(by=sort_col_map[sort_by], ascending=False).reset_index(drop=True)
         
-        # 테이블 컬럼 한글화 출력
-        display_cust_df = sorted_customers.copy()
+        # 테이블 컬럼 한글화 출력 (필요한 4개 컬럼만 명시적으로 선택)
+        display_cust_df = sorted_customers[['CustomerID', 'Total_Spend', 'Unique_Products', 'Purchase_Count']].copy()
         display_cust_df.columns = ['고객 ID', '총 구매 금액 (£)', '구매 상품 수 (종류)', '총 주문 횟수']
         display_cust_df['총 구매 금액 (£)'] = display_cust_df['총 구매 금액 (£)'].map(lambda x: f"£{x:,.2f}")
         st.dataframe(display_cust_df, use_container_width=True, height=300)
@@ -455,3 +462,113 @@ elif page == "👤 고객 분석 & 추천":
         * **하이브리드 추천 기법 제안**:
           정밀도가 높고 인기가 검증된 협업 필터링 결과와 신선하고 다양한 품목을 발굴해 주는 임베딩 모델 결과를 가중 결합하여 하이브리드(Hybrid) 형태로 실제 사용자에게 제공할 때, 오프라인 정확도와 사용자 구매 만족도(다양성)를 동시에 극대화할 수 있습니다.
         """)
+        
+elif page == "👥 고객 군집화 분석":
+    st.title("👥 고객 RFM 기반 군집화 및 세그먼트 분석")
+    st.markdown("머신러닝(K-Means) 알고리즘을 사용한 군집화 결과와 마케팅 규칙 기반 세그먼트를 3차원 공간에서 대조 및 분석합니다.")
+    
+    # 사이드바에서 군집 개수 조절 및 세션 상태 동기화
+    k_val = st.sidebar.slider(
+        "K-Means 군집 개수 (K)", 
+        min_value=2, max_value=8, 
+        value=st.session_state['n_clusters'], 
+        step=1, key="cluster_k_slider"
+    )
+    st.session_state['n_clusters'] = k_val
+    
+    # RFM 데이터 준비 및 스케일 변환
+    rfm_df = customer_stats.copy()
+    
+    # K-Means 연산을 위한 피처 로그 변환 및 StandardScaler 정규화
+    features = ['Recency', 'Frequency', 'Monetary']
+    X = rfm_df[features].copy()
+    X_log = np.log1p(X)
+    
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_log)
+    
+    # K-Means 클러스터링 실행
+    kmeans = KMeans(n_clusters=k_val, random_state=42, n_init=10)
+    rfm_df['Cluster'] = kmeans.fit_predict(X_scaled)
+    rfm_df['Cluster'] = rfm_df['Cluster'].astype(str)
+    
+    # Plotly 3D 서브플롯 생성 (1행 2열)
+    fig = make_subplots(
+        rows=1, cols=2,
+        specs=[[{'type': 'scatter3d'}, {'type': 'scatter3d'}]],
+        subplot_titles=(f"K-Means 군집화 결과 (K={k_val})", "마케팅 규칙 기반 RFM 세그먼트")
+    )
+    
+    # 왼쪽: K-Means 군집 산점도
+    for cluster_id in sorted(rfm_df['Cluster'].unique()):
+        sub = rfm_df[rfm_df['Cluster'] == cluster_id]
+        fig.add_trace(
+            go.Scatter3d(
+                x=sub['Recency'], y=sub['Frequency'], z=sub['Monetary'],
+                mode='markers',
+                marker=dict(size=4, opacity=0.7),
+                name=f"Cluster {cluster_id}"
+            ),
+            row=1, col=1
+        )
+        
+    # 오른쪽: RFM 세그먼트 산점도
+    segments = ['VIP', 'Loyal', 'New/Promising', 'About to Sleep', 'Lost/Hibernating']
+    colors = {'VIP': '#d62728', 'Loyal': '#1f77b4', 'New/Promising': '#2ca02c', 'About to Sleep': '#ff7f0e', 'Lost/Hibernating': '#7f7f7f'}
+    for seg in segments:
+        sub = rfm_df[rfm_df['RFM_Segment'] == seg]
+        fig.add_trace(
+            go.Scatter3d(
+                x=sub['Recency'], y=sub['Frequency'], z=sub['Monetary'],
+                mode='markers',
+                marker=dict(size=4, opacity=0.7, color=colors.get(seg, '#7f7f7f')),
+                name=seg
+            ),
+            row=1, col=2
+        )
+        
+    fig.update_layout(
+        height=650,
+        margin=dict(l=0, r=0, b=0, t=50),
+        scene=dict(xaxis_title='최근성(Recency)', yaxis_title='빈도(Frequency)', zaxis_title='금액(Monetary)', zaxis_type='log'),
+        scene2=dict(xaxis_title='최근성(Recency)', yaxis_title='빈도(Frequency)', zaxis_title='금액(Monetary)', zaxis_type='log')
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # 군집별 기술 통계 평균 요약
+    st.subheader("📊 K-Means 군집별 평균 특성 정보")
+    cluster_summary = rfm_df.groupby('Cluster').agg(
+        고객수=('CustomerID', 'count'),
+        평균최근성_일=('Recency', 'mean'),
+        평균주문수_회=('Frequency', 'mean'),
+        평균구매액_파운드=('Monetary', 'mean')
+    ).reset_index()
+    cluster_summary.columns = ['군집', '고객 수 (명)', '평균 최근성 (일)', '평균 주문 횟수 (회)', '평균 구매액 (£)']
+    cluster_summary['평균 최근성 (일)'] = cluster_summary['평균 최근성 (일)'].map(lambda x: f"{x:.1f}일")
+    cluster_summary['평균 주문 횟수 (회)'] = cluster_summary['평균 주문 횟수 (회)'].map(lambda x: f"{x:.1f}회")
+    cluster_summary['평균 구매액 (£)'] = cluster_summary['평균 구매액 (£)'].map(lambda x: f"£{x:,.2f}")
+    st.dataframe(cluster_summary, use_container_width=True)
+    
+    # 비즈니스 액션플랜 제시
+    st.subheader("💡 군집별 특성 기반 맞춤형 비즈니스 액션플랜")
+    
+    # 동적 비즈니스 가이드 도출
+    cluster_ids = sorted(rfm_df['Cluster'].unique())
+    cols = st.columns(len(cluster_ids))
+    for idx, cid in enumerate(cluster_ids):
+        sub_cluster = rfm_df[rfm_df['Cluster'] == cid]
+        # 군집별 대표 특성 파악
+        mean_r = sub_cluster['Recency'].mean()
+        mean_f = sub_cluster['Frequency'].mean()
+        mean_m = sub_cluster['Monetary'].mean()
+        
+        with cols[idx]:
+            st.markdown(f"#### 📦 Cluster {cid}")
+            if mean_r <= 60 and mean_f >= 10 and mean_m >= 1000:
+                st.success("**[핵심 VIP 군집]**\n\n* **특성**: 최근 거래가 활발하며 구매 횟수와 금액 모두 최상위인 핵심 VIP 고객군입니다.\n* **액션플랜**: 1:1 VIP 케어 프로그램 도입, 신제품 출시 전 프라이빗 선공개 혜택 부여, 로열티 누적 포인트 2배 제공을 통해 이탈 방지 장벽 구축.")
+            elif mean_r > 120 and mean_m >= 800:
+                st.warning("**[고액 이탈/휴면 위험]**\n\n* **특성**: 과거에는 큰 금액을 지출했으나 최근 수개월간 구매 이력이 끊긴 고위험 고객군입니다.\n* **액션플랜**: 이메일 및 LMS 개인화 타겟팅을 통해 '웰컴 백 전용 20% 특별 할인 코드' 발송 및 과거 주요 카테고리 개인화 추천 노출.")
+            elif mean_r <= 45 and mean_f <= 3:
+                st.info("**[유망 신규/잠재 군집]**\n\n* **특성**: 최근에 유입되었으나 아직 누적 구매 빈도와 지출액이 낮은 초기 활성 고객군입니다.\n* **액션플랜**: 재구매 유도를 위한 첫 구매 감사 소액 할인권 발행, 연관 구매율이 높은 크로스셀링(Cross-selling) 추천 서비스 노출.")
+            else:
+                st.error("**[장기 휴면/이탈 대기]**\n\n* **특성**: 마지막 구매일이 매우 오래되었으며 구매 빈도 및 금액이 모두 하위권인 고객군입니다.\n* **액션플랜**: 마케팅 비용 투자를 최소화하되, 분기별 빅세일 등 대규모 프로모션 메일링 기반의 저비용 전체 타겟 마케팅 진행.")
